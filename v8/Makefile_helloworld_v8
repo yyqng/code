@@ -1,0 +1,4 @@
+helloworld_v8 : helloworld_v8.cc
+	g++ -m64  -I../../include -L../../lib64  helloworld_v8.cc -o helloworld_v8 -lpthread -lv8 -Wl,--rpath=../../lib64
+clean :
+	rm -f helloworld_v8

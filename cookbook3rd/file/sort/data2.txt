@@ -1,0 +1,4 @@
+alpha 300
+betb 200
+beta 200
+gamma 100

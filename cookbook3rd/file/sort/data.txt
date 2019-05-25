@@ -1,0 +1,7 @@
+mac 2000
+winxp 4000
+bsd 1000
+linux 1000
+linux 1000
+linux 10xx
+xxnux 10xx

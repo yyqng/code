@@ -1,0 +1,17 @@
+test 1
+test 2
+ls: cannot access '+': No such file or directory
+a1
+a2
+in.txt
+out.txt
+redirection.sh
+temp.txt
+a1
+a2
+in.txt
+out.txt
+redirection.sh
+temp.txt
+A1
+A2

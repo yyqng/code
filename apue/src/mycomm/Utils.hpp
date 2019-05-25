@@ -1,0 +1,773 @@
+#ifndef __UTILS_HPP__
+#define __UTILS_HPP__
+////////////////////////////////////////////////////////////////////////////////
+///
+/// @file Utils.hpp
+///
+/// @brief Utility APIs declaration.
+///
+/// Utility APIs provide some useful functions.
+///
+////////////////////////////////////////////////////////////////////////////////
+
+#include <stdio.h>
+#include <iostream>
+#include <sstream>
+#include <string.h>
+#include <pthread.h>
+#include <assert.h>
+#include <stdarg.h>
+#include <arpa/inet.h>  // ntohs
+#include <vector>
+#include <byteswap.h>
+#include <unistd.h>
+
+template <class T> class TAutoObj;
+
+struct StringIntMap
+{
+    const char* str;
+    int value;
+};
+
+extern int StringMapInt(StringIntMap* maps, const std::string& str, bool isIgnCase=false);
+
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// @class ThreadMutex
+///
+/// @brief thead mutex
+///
+////////////////////////////////////////////////////////////////////////////////
+class ThreadMutex
+{
+public:
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Constructor
+    ////////////////////////////////////////////////////////////////////////////
+    ThreadMutex();
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Destructor
+    ////////////////////////////////////////////////////////////////////////////
+    virtual ~ThreadMutex();
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Lock once in process
+    /// @return none
+    ////////////////////////////////////////////////////////////////////////////
+    void LockOnce();
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Unlock once in process
+    /// @return none
+    ////////////////////////////////////////////////////////////////////////////
+    void UnlockOnce();
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Lock once in process but multiple in thread
+    /// @return none
+    ////////////////////////////////////////////////////////////////////////////
+    void LockMulti();
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Unlock once in process but multiple in thread
+    /// @return none
+    ////////////////////////////////////////////////////////////////////////////
+    void UnlockMulti();
+
+private:
+
+    pthread_mutex_t m_mutex;
+    pthread_t m_lockThreadId;
+    uint32_t m_lockCnt;
+
+};
+
+
+enum ValueType
+{
+    VALUE_INT,
+    VALUE_STRING,
+    VALUE_IPADDR,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// @class StringToValue
+///
+/// This class is used to convert string to value.
+///
+////////////////////////////////////////////////////////////////////////////////
+class StringToValue
+{
+
+public:
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Constructor
+    ////////////////////////////////////////////////////////////////////////////
+    StringToValue();
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Destructor
+    ////////////////////////////////////////////////////////////////////////////
+    virtual ~StringToValue();
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Override operator =
+    /// @param[in] rhs - right hand instance
+    /// @return result instance
+    ////////////////////////////////////////////////////////////////////////////
+    StringToValue& operator=(const StringToValue& rhs);
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Set option value type
+    /// @param[in] type - value type
+    /// @return none
+    ////////////////////////////////////////////////////////////////////////////
+    void SetType(ValueType GetType);
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Set option value
+    /// @param[in] valueString - value string
+    /// @return none
+    ////////////////////////////////////////////////////////////////////////////
+    void SetValue(const std::string& GetValueString);
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Get value type
+    /// @return value type
+    ////////////////////////////////////////////////////////////////////////////
+    ValueType GetType() const;
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Check if has value
+    /// @return true if has, otherwise false
+    ////////////////////////////////////////////////////////////////////////////
+    bool HasValue() const;
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Get value string
+    /// @return value string
+    ////////////////////////////////////////////////////////////////////////////
+    const std::string& GetValueString() const;
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Get value as int
+    /// @return value
+    ////////////////////////////////////////////////////////////////////////////
+    int GetValueAsInt() const;
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Get value as string
+    /// @return value
+    ////////////////////////////////////////////////////////////////////////////
+    const char* GetValueAsString() const;
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Get value as IP address
+    /// @return value
+    ////////////////////////////////////////////////////////////////////////////
+    in_addr_t GetValueAsIpAddr() const;
+
+private:
+
+    union ValueUnion
+    {
+        int vInt;
+        const char* vString;
+        struct in_addr vIpaddr;
+    };
+
+    ValueType m_type;
+    std::string m_string;
+    ValueUnion m_value;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Override operator << for class StringToValue
+/// @param[out] os - out stream
+/// @param[in] rhs - right hand instance
+/// @return out stream
+////////////////////////////////////////////////////////////////////////////////
+extern std::ostream& operator<<(std::ostream &os, const StringToValue& rhs);
+
+////////////////////////////////////////////////////////////////////////////////
+///
+/// @class FileTime
+///
+/// This class is used to monitor file time.
+///
+////////////////////////////////////////////////////////////////////////////////
+class FileTime
+{
+
+public:
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Constructor
+    ////////////////////////////////////////////////////////////////////////////
+    FileTime();
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Destructor
+    ////////////////////////////////////////////////////////////////////////////
+    virtual ~FileTime();
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Set file
+    /// @param[in] fileName - file name
+    /// @return 0 if successful, otherwise -1
+    ////////////////////////////////////////////////////////////////////////////
+    int SetFile(const std::string& fileName);
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Update file time
+    /// @param[in] atime - if update atime
+    /// @param[in] mtime - if update mtime
+    /// @param[in] ctime - if update ctime
+    /// @return true if file time is changed, otherwise false
+    ////////////////////////////////////////////////////////////////////////////
+    bool UpdateTime(bool atime = true, bool mtime = true, bool ctime = true);
+
+private:
+
+    void ClearTime();
+
+    std::string m_fileName;
+    time_t m_atime;
+    time_t m_mtime;
+    time_t m_ctime;
+
+};
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief convert ip to string
+/// @param[in] ip - ip address
+/// @return ip string
+////////////////////////////////////////////////////////////////////////////////
+extern std::string IpV4ToString(in_addr_t ip);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get dir name of a full file name
+/// @param[in] fileName - full file name
+/// @return dir name
+////////////////////////////////////////////////////////////////////////////////
+extern std::string GetDirName(const std::string& fileName);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get base name of a full file name
+/// @param[in] fileName - full file name
+/// @return base name
+////////////////////////////////////////////////////////////////////////////////
+extern std::string GetBaseName(const std::string& fileName);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get suffix of a file name
+/// @param[in] fileName - file name
+/// @return suffix
+////////////////////////////////////////////////////////////////////////////////
+extern std::string GetSuffix(const std::string& fileName);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Split file full name to path, file, file name and extension name
+/// @param[in] fileFullName - full file name
+/// @param[out] path - path
+/// @param[out] file - base name
+/// @param[out] fileName - file name
+/// @param[out] fileExt - extension name
+/// @return none
+////////////////////////////////////////////////////////////////////////////////
+extern void SplitFileName(const std::string& fileFullName,
+                          std::string* path,
+                          std::string* file,
+                          std::string* fileName,
+                          std::string* fileExt);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Create a directory
+/// @param[in] path - directory path
+/// @return 0 if successful, otherwise -1
+////////////////////////////////////////////////////////////////////////////////
+extern int CreateDir(const char* path);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Create a directory
+/// @param[in] path - directory path
+/// @param[in] ends - if path ends with '/'
+/// @return new path
+////////////////////////////////////////////////////////////////////////////////
+std::string AdjustPath(const std::string& path, bool ends);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Check if a file exists
+/// @param[in] file - full file name
+/// @return true if exist, otherwise false
+////////////////////////////////////////////////////////////////////////////////
+extern bool IsFileExist(const char* file);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Create a file
+/// @param[in] file - full file name
+/// @return 0 if successful, otherwise -1
+////////////////////////////////////////////////////////////////////////////////
+extern int CreateFile(const char* file);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get file size
+/// @param[in] file - full file name
+/// @return file size if successful, otherwise -1
+////////////////////////////////////////////////////////////////////////////////
+extern ssize_t GetFileSize(const char* file);
+
+/// base name of current file
+#define BASENAME_OF_FILE (strrchr(__FILE__,'/') != 0 ? strrchr(__FILE__,'/')+1 : __FILE__)
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Print a message and error string
+/// @param[in] file - file name
+/// @param[in] line - file line
+/// @param[in] format - output format
+/// @return none
+////////////////////////////////////////////////////////////////////////////////
+extern void PrintError(const char* file, const int line, const char* format, ... );
+
+/// define name of pError
+#define PERROR(format, args...) PrintError(BASENAME_OF_FILE, __LINE__, format, ##args)
+
+typedef std::vector<std::string> VectorString;
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Split string with single char
+/// @param[in] begin - string begin
+/// @param[in] end - string end. If it is NULL, string ends with '\0'.
+/// @param[int] sep - seperator chars
+/// @param[out] result - split result
+/// @return 0 if successful, otherwise -1
+////////////////////////////////////////////////////////////////////////////////
+int StringSplitByChar(const char* begin, const char* end, const char* sep, VectorString& result);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Split string with string
+/// @param[in] begin - string begin
+/// @param[in] end - string end. If it is NULL, string ends with '\0'.
+/// @param[int] sep - seperator string
+/// @param[out] result - split result
+/// @return 0 if successful, otherwise -1
+////////////////////////////////////////////////////////////////////////////////
+int StringSplitByString(const char* begin, const char* end, const char* sep, VectorString& result);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Split string with seperator chars
+/// @param[in] begin - string begin
+/// @param[in] end - string end. If it is NULL, string does not end with '\0'.
+/// @param[int] sep - seperator chars
+/// @param[out] result - split result
+/// @return 0 if successful, otherwise -1
+////////////////////////////////////////////////////////////////////////////////
+int StringSplitInclude0(const char* begin, const char* end, const char* sep, VectorString& result);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Trim chars from string
+/// @param[in] src - src string
+/// @param[in] left - chars from left to trim
+/// @param[int] right - chars from right to trim
+/// @return trimed string
+////////////////////////////////////////////////////////////////////////////////
+std::string StringTrim(const std::string& src, const std::string& left, const std::string& right);
+
+
+/**
+* @brief 字符串替换
+* @param[in] sSrc - 源字符串
+* @param[in] sFilter - 需要替换的字符串
+* @param[in] sNew - 替换后的字符串
+* @return 成功返回替换后字符串
+**/
+std::string ReplaceString(const std::string &sSrc, const std::string &sFilter, const std::string &sNew);
+
+
+/**
+* @brief 字符串消除换行符
+* @param[in] line - 源字符串
+* @return 成功返回处理后字符串
+**/
+std::string RemoveCrLf(const std::string& line);    
+	
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Calculate the length of the memory from begin to end which consists
+///        entirely of characters in accept
+/// @param[in] begin - memory begin
+/// @param[in] end - memory end.
+/// @param[int] accept - accept chars
+/// @param[out] acceptNum - accept chars number
+/// @return length
+////////////////////////////////////////////////////////////////////////////////
+extern size_t MemSpn(const char* begin, const char* end, const char* accept, size_t acceptNum);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Calculate the length of the memory from begin to end which consists
+///        entirely of characters not in reject
+/// @param[in] begin - memory begin
+/// @param[in] end - memory end.
+/// @param[int] reject - reject chars
+/// @param[out] rejectNum - reject chars number
+/// @return length
+////////////////////////////////////////////////////////////////////////////////
+extern size_t MemCspn(const char* begin, const char* end, const char* reject, size_t rejectNum);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Read config from file
+/// @param[in] file - config file name
+/// @param[in] key - config key name
+/// @param[out] value - config value
+/// @return 0 if successful, otherwise -1
+////////////////////////////////////////////////////////////////////////////////
+extern int ReadConfigFile(const std::string& file,
+                          const std::string& key,
+                          VectorString& value);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get random integer
+/// @param[in] min - minimum integer
+/// @param[in] max - maximum integer
+/// @return a random integer between min and max
+////////////////////////////////////////////////////////////////////////////////
+extern int GetRand(int min, int max);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Print data
+/// @param[out] out - output string
+/// @param[in] data - data buffer
+/// @param[in] size - data size
+/// @param[in] printAddr - the begin address to print
+/// @param[in] hasAddr - if print address
+/// @param[in] hasHex - if print hex data
+/// @param[in] hasChar - if print char data
+/// @return a reference to output string
+////////////////////////////////////////////////////////////////////////////////
+extern std::ostream& DumpData(std::ostream& out,
+                              const void* data,
+                              size_t size,
+                              const void* printAddr = 0,
+                              bool hasAddr = true,
+                              bool hasHex = true,
+                              bool hasChar = true);
+
+class StringBuffer
+{
+public:
+
+    StringBuffer(size_t bufLen = 80);
+    virtual ~StringBuffer();
+
+    void Clear();
+    const std::string& GetString() const;
+
+    StringBuffer& Set(const std::string& v);
+    StringBuffer& Add(const std::string& v);
+
+    StringBuffer& Set(const char* format, ...);
+    StringBuffer& Add(const char* format, ...);
+
+    StringBuffer& operator=(const StringBuffer& v);
+    StringBuffer& operator<<(const StringBuffer& v);
+
+    StringBuffer& operator<<(char v);
+    StringBuffer& operator<<(unsigned char v);
+    StringBuffer& operator<<(short v);
+    StringBuffer& operator<<(unsigned short v);
+    StringBuffer& operator<<(int v);
+    StringBuffer& operator<<(unsigned int v);
+    StringBuffer& operator<<(long v);
+    StringBuffer& operator<<(unsigned long v);
+    StringBuffer& operator<<(const std::string& v);
+
+private:
+
+    size_t m_bufLen;
+    char* m_buf;
+    std::string m_str;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get process full name
+/// @return process full name
+////////////////////////////////////////////////////////////////////////////////
+extern const char* GetProcFullName();
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get process base name
+/// @param[in] fullName - process full name
+/// @return process base name
+////////////////////////////////////////////////////////////////////////////////
+extern const char* GetProcBaseName(const char* fullName = NULL);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get process path name
+/// @param[in] fullName - process full name
+/// @return process path name
+////////////////////////////////////////////////////////////////////////////////
+extern const char* GetProcPathName(const char* fullName = NULL);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Check if the memory address is valid
+/// @param[in] address - Start address
+/// @param[in] size - memory size
+/// @return true if valid, otherwise false
+////////////////////////////////////////////////////////////////////////////////
+extern bool IsValidAddress(const void* address, int size);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Copy file
+/// @param[in] src - srcfile name
+/// @param[in] dst - dst file name
+/// @return 0 if successful, otherwise -1
+////////////////////////////////////////////////////////////////////////////////
+extern int CopyFile(const char* src, const char* dst);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Move or rename file
+///        rename() maybe fail when the src and dst files are not in the same
+///        file system.
+/// @param[in] oldName - old file name
+/// @param[in] newName - new file name
+/// @return 0 if successful, otherwise -1
+////////////////////////////////////////////////////////////////////////////////
+extern int MoveFile(const char* oldName, const char* newName);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get current time in seconds.
+/// @return time in seconds
+////////////////////////////////////////////////////////////////////////////////
+extern double GetTimeAsDouble(void);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get time string
+/// @param[in] tt - time
+/// @return time string
+////////////////////////////////////////////////////////////////////////////////
+extern std::string GetTimeString(time_t tt);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get time_t
+/// @param[in] year - year, e.g. 2001
+/// @param[in] mon - month, 1-12
+/// @param[in] day - day, 1-31
+/// @param[in] hour - hour, 0-23
+/// @param[in] min - minute, 0-59
+/// @param[in] sec - second, 0-59
+/// @return time string
+////////////////////////////////////////////////////////////////////////////////
+extern time_t MakeTime(int year, int mon, int day, int hour, int min, int sec);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get time_t
+/// @param[in] date - date string, e.g. 2015-03-10 20:08:25
+/// @param[in] format - date string format, %Y-%m-%d %H:%M:%S
+/// @return time_t
+////////////////////////////////////////////////////////////////////////////////
+extern time_t StrToTime(const char *date,const char * format = "%Y-%m-%d %H:%M:%S");
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Sleep for seconds
+/// @param[in] seconds - time to sleep, in seconds
+/// @return none
+////////////////////////////////////////////////////////////////////////////////
+extern void SleepInDouble(const double seconds);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get the total number of processes with same name
+/// @param[in] name - process name
+/// @return
+///    >=0: number
+///     <0: error
+////////////////////////////////////////////////////////////////////////////////
+extern int GetMultiProcessNum(const char* name);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Hex integer to string
+/// @param[in] p - start address
+/// @param[in] len - integer length
+/// @return string
+////////////////////////////////////////////////////////////////////////////////
+extern std::string HexIntToString(const void* p, int len);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Hex integer to string   0x8  ==> 08
+/// @param[in] p - start address
+/// @param[in] len - integer length
+/// @return string
+////////////////////////////////////////////////////////////////////////////////
+extern std::string HexIntToString_v2(const void* p, int len);
+extern std::string HexIntToString_v2(const std::string& in);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Hex string to binary   12  ==> 0x12
+/// @param[in] s - hex string
+/// @return binary vector
+////////////////////////////////////////////////////////////////////////////////
+std::vector<char> HexStrToBin(const std::string& s);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get size from string with unit of 'k','K','m','M','g','G','t','T'
+/// @param[in] data - string
+/// @return size
+////////////////////////////////////////////////////////////////////////////////
+extern size_t StringToSize(const char* data);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief Get last time with format "DD days, HH:MM:SS"
+/// @param[in] t - time
+/// @return string
+////////////////////////////////////////////////////////////////////////////////
+extern std::string GetLastTime(double t);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief format integer to string
+/// @param[in] format - output format
+/// @param[in] value - integer value
+/// @return string
+////////////////////////////////////////////////////////////////////////////////
+extern std::string IntToString(long value, const char* format = NULL);
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief get swap usage in linux system
+/// @param[in] total - total bytes
+/// @param[in] free - free bytes
+/// @param[in] used - used bytes
+/// @return 0 if successful, otherwise -1
+////////////////////////////////////////////////////////////////////////////////
+int GetLinuxSwapInfo(size_t* total, size_t* free, size_t* used);
+
+#if 0
+////////////////////////////////////////////////////////////////////////////////
+/// @brief get thread identification
+/// @return thread identification, like getpid()
+////////////////////////////////////////////////////////////////////////////////
+pid_t gettid();
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief get thread identification
+/// @param[in] thid - thread id from pthread_create() or pthread_self()
+/// @return thread identification, like getpid()
+////////////////////////////////////////////////////////////////////////////////
+pid_t gettid(pthread_t thid);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief get app stack
+/// @param[in] pid - process identification
+/// @return stack
+////////////////////////////////////////////////////////////////////////////////
+std::string GetStack(pid_t pid);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief 读取文件数据
+/// @param[in] file - 文件路径
+/// @param[out] data - 文件数据
+/// @return 成功返回0，失败返回-1
+////////////////////////////////////////////////////////////////////////////////
+int ReadFileData(const std::string& file, std::vector<char>& data);
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief 写入文件数据
+/// @param[in] file - 文件路径
+/// @param[in] data - 文件数据
+/// @param[in] dataSize - 文件数据长度
+/// @return 成功返回0，失败返回-1
+////////////////////////////////////////////////////////////////////////////////
+int WriteFileData(const std::string& file, const void* data, size_t dataSize);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// @brief 判断是否是内网IP
+/// @param[in] ip - ip地址，网络字节序
+/// @return 是内网IP返回true，否则返回false
+////////////////////////////////////////////////////////////////////////////////
+bool IsIntranetIp(in_addr_t ip);
+
+
+#define STR_CPY(dst, src)\
+{\
+    if ((dst != NULL) && (src != NULL))\
+    {\
+        strncpy((char*)(dst), (const char*)(src), sizeof(dst)-1);\
+        dst[sizeof(dst)-1] = '\0';\
+    }\
+}
+
+#define MILLI_SECOND            1000
+#define MICRO_SECOND            1000000
+#define NANO_SECOND             1000000000
+
+#if     BYTE_ORDER == BIG_ENDIAN
+#define ntoh64(x)   (x)
+#else   /* BYTE_ORDER == LITTLE_ENDIAN */
+#define ntoh64(x)   bswap_64(x)
+#endif
+
+#define hton64(x)   ntoh64(x)
+
+#define SELF_BYTE_SWAP_16(x)    ((x) = bswap_16(x))
+#define SELF_BYTE_SWAP_32(x)    ((x) = bswap_32(x))
+#define SELF_BYTE_SWAP_64(x)    ((x) = bswap_64(x))
+
+template <class T>
+T GetIntBigEndian(const void* in)
+{
+    int len = sizeof(T);
+    T out = 0;
+    const uint8_t* p = (const uint8_t*)in;
+
+    for (int i = 0; i < len; ++i, ++p)
+    {
+        out = (out << 8) + *p;
+    }
+
+    return out;
+}
+
+template <class T>
+T GetIntLittleEndian(const void* in)
+{
+    int len = sizeof(T);
+    T out = 0;
+    const uint8_t* p = (const uint8_t*)in;
+
+    p += len - 1;
+    for (int i = 0; i < len; ++i, --p)
+    {
+        out = (out << 8) + *p;
+    }
+
+    return out;
+}
+
+void StrToHex(std::string& out, unsigned char* pSrc, size_t size);
+
+uint64_t RoundPower2(uint64_t n);
+
+template<typename T, size_t N>
+char (*__countof_helper(T(&)[N]))[N]; // __countof_helper返回数组指针char(*)[N]
+
+// 带类型检测的求数组元素个数，当Array不是数组时无法编译通过
+#define __countof(Array)     (sizeof (*__countof_helper(Array)))
+
+
+/// Get unit number of an array
+#define ARRAY_UNIT_NUM(array)   (sizeof(array)/sizeof(array[0]))
+
+#define MIN(a,b)    (((a)<(b))?(a):(b))
+#define MAX(a,b)    (((a)>(b))?(a):(b))
+
+#endif // __UTILS_HPP__
+
