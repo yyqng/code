@@ -31,14 +31,14 @@ int curlhttp(int argc, char *argv[])
         //curl_easy_setopt(curl, CURLOPT_PROXY, "45.78.30.207:10808"); 
         //curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, "userc:usercpasswd"); 
 
-        curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5_HOSTNAME); 
-        curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1"); 
-        curl_easy_setopt(curl, CURLOPT_PROXYPORT, "1080"); 
-
         //curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5_HOSTNAME); 
-        //curl_easy_setopt(curl, CURLOPT_PROXY, "172.245.156.202"); 
-        //curl_easy_setopt(curl, CURLOPT_PROXYPORT, "10808"); 
-        //curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD , "thinkerthinkerthinker"); 
+        //curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1"); 
+        //curl_easy_setopt(curl, CURLOPT_PROXYPORT, "1080"); 
+
+        curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5_HOSTNAME); 
+        curl_easy_setopt(curl, CURLOPT_PROXY, "107.172.86.48"); 
+        curl_easy_setopt(curl, CURLOPT_PROXYPORT, "10808"); 
+        curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD , "thinkerthinkerthinker"); 
         //curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1:7788"); 
         CURLcode res = curl_easy_perform(curl);
         long http_code = 0;
