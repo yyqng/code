@@ -1,5 +1,5 @@
 OBJ=api.o
-TARGET=api
+TARGET=api.out
 CFLAG=-llua
 CC=gcc
 
