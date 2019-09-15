@@ -7,11 +7,11 @@ CC=g++
 all:$(TARGET)
 
 $(TARGET):$(OBJ)
-	$(CC) $(OBJ) $(CFLAG) -o $(TARGET)
+	$(CC) $(OBJ)  $(CFLAG) -o $(TARGET)
 
-%.o:%.c
-	$(CC) $(CFLAG) -c $< -o $@ -g
+%.o:%.cpp
+	$(CC) $(CFLAG) -c $< -o $@
 
 .PHONY:clean
 clean:
-	rm $(OBJ) $(TARGET) -f
+	rm $(TARGET) $(OBJ) -f
