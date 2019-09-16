@@ -1,5 +1,7 @@
 #!/usr/local/bin/lua
 
-print("Hello World！")
-print("www.runoob.com")
+s1 = "Hello World"
+s2 = "www.runoob.com"
+s3 = 31415
+print(s1, s2, s3)
 
