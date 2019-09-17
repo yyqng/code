@@ -1,6 +1,6 @@
-OBJ=lualib.o
+OBJ=mylib.o
 CSC=sum2.c
-TARGET=lualib.so
+TARGET=mylib.so
 CFLAG=-g -Wall -llua -shared -fPIC
 CC=gcc
 all:$(TARGET)
@@ -8,7 +8,7 @@ all:$(TARGET)
 $(TARGET):$(OBJ)
 	$(CC) $(OBJ)   $(CFLAG) -o $(TARGET)
 #	$(CC) $(OBJ)   -shared -fPIC -o $(TARGET)
-#	gcc lualib.c -fPIC -shared -o lualib.so
+#	gcc mylib.c -fPIC -shared -o mylib.so
 
 %.o:%.c
 	$(CC) $(CFLAG) -c $< -o $@

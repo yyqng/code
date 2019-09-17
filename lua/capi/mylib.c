@@ -16,14 +16,13 @@ static int l_sin (lua_State *L) {
     return 1; /* number of results */
 }
  
-static const struct luaL_Reg lualib[] = {
+static const struct luaL_Reg mylib[] = {
     {"sum" , sum},
     {"l_sin" , l_sin},
     {NULL, NULL}
 };
  
-int luaopen_lualib(lua_State *L){
-    luaL_newlib(L, lualib); // 5.2
-    //luaL_register(L, "lualib",ding); // lua 5.1
+int luaopen_mylib(lua_State *L){
+    luaL_newlib(L, mylib); // 5.2
     return 1;
 }
