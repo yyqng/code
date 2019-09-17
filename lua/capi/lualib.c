@@ -9,9 +9,16 @@ static int sum(lua_State *L){
     lua_pushnumber(L, d1+d2);
     return 1;
 }
+
+static int l_sin (lua_State *L) {
+    double d = lua_tonumber(L, 1); /* get argument */
+    lua_pushnumber(L, sin(d)); /* push result */
+    return 1; /* number of results */
+}
  
 static const struct luaL_Reg lualib[] = {
     {"sum" , sum},
+    {"l_sin" , l_sin},
     {NULL, NULL}
 };
  

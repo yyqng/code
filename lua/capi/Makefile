@@ -6,7 +6,8 @@ CC=gcc
 all:$(TARGET)
 
 $(TARGET):$(OBJ)
-	$(CC) $(OBJ)  $(CFLAG) -o $(TARGET)
+	$(CC) $(OBJ)   $(CFLAG) -o $(TARGET)
+#	$(CC) $(OBJ)   -shared -fPIC -o $(TARGET)
 #	gcc lualib.c -fPIC -shared -o lualib.so
 
 %.o:%.c
