@@ -434,6 +434,13 @@ static int handle_luainit (lua_State *L) {
     return dostring(L, init, name);
 }
 
+///////////////////////Register lua function. quick-and-dirty/////////////////////////
+#include <math.h>
+static int l_sin (lua_State *L) {
+    double d = lua_tonumber(L, 1); /* get argument */
+    lua_pushnumber(L, sin(d)); /* push result */
+    return 1; /* number of results */
+}
 
 static int pmain (lua_State *L) {
   int argc = (int)lua_tointeger(L, 1);
@@ -456,6 +463,11 @@ static int pmain (lua_State *L) {
   luaL_checkversion(L);
   lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
   luaL_openlibs(L);  /* open libraries */
+
+///////////////////////Register lua function. quick-and-dirty/////////////////////////
+  lua_pushcfunction(L, l_sin);
+  lua_setglobal(L, "mysin");
+
   lua_gc(L, LUA_GCRESTART, 0);
   if (!args[has_E] && handle_luainit(L) != LUA_OK)
     return 0;  /* error running LUA_INIT */
