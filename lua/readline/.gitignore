@@ -1,4 +1,3 @@
-Makefile
 
 *.o
 *.a
@@ -10,10 +9,6 @@ config.cache
 config.h
 config.log
 config.status
-
-doc/Makefile
-examples/Makefile
-shlib/Makefile
 
 examples/fileman
 examples/hist_erasedups
