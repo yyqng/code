@@ -65,6 +65,32 @@ void sizeofTest()
     printf("sizeof(long )=%ld\n",sizeof(long ));
     ::printf("sizeof(size_t)=%ld\n",sizeof(size_t));
 }
+
+int printfTest(void) {
+//    char s[] = "abcdefg";
+    int i = 12345;
+    int j = -45;
+    double d = 123.45678;
+    double e = 23.45678;
+
+//    printf("%s\n", s);
+//    printf("%.*s\n", 3, s);
+//    printf("%#.8x\n", s);
+//    printf("%#p\n\n", s);
+//
+//    printf("%d\n", i);
+    printf("%*d\n", 6, i);
+    printf("%*d\n", 6, j);
+//    printf("%0*d\n\n", 10, i);
+//
+//    printf("%f\n", d);
+//    printf("%.*f\n", 3, d);
+//    printf("%20.10f\n", d);
+    printf("%*.*f\n\n", 20, 10, d, d);
+    printf("%*.*f\n\n", 20, 10, e, e);
+
+    return 0;
+}
 int main(int argc, char *argv[])
 {
     //vartest();
@@ -76,7 +102,8 @@ int main(int argc, char *argv[])
     //p[0] = 4;
     //printf("p[0] is %d\n", p[0]);
     //sizeofTest();
-    definetest2();
+    //definetest2();
     //definetest3();
+    printfTest();
 }
 
