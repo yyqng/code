@@ -47,10 +47,26 @@ static int dir (lua_State *L) {
     /* table is already on top */
 }
  
+int map (lua_State *L) {
+    int i, n;
+    /* 1st argument must be a table (t) */
+    luaL_checktype(L, 1, LUA_TTABLE);
+    /* 2nd argument must be a function (f) */
+    luaL_checktype(L, 2, LUA_TFUNCTION);
+    n = lua_rawlen(L, 1); /* get size of table */
+    for (i=1; i<=n; i++) {
+        lua_pushvalue(L, 2); /* push f */
+        lua_rawgeti(L, 1, i); /* push t[i] */
+        lua_call(L, 1, 1); /* call f(t[i]) */
+        lua_rawseti(L, 1, i); /* t[i] = result */
+    }
+    return 0; /* no results */
+}
 static const struct luaL_Reg mylib[] = {
     {"l_sum" , sum},
     {"l_sin" , mysin},
     {"l_dir" , dir},
+    {"l_map" , map},
     {NULL, NULL}
 };
  
