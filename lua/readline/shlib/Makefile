@@ -34,7 +34,7 @@ VPATH = ..
 topdir = ..
 BUILD_DIR = /home/yoyu/hub/testcode/lua/readline
 
-INSTALL = /usr/bin/install -c
+INSTALL = /bin/install -c
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_DATA = ${INSTALL} -m 644
 
@@ -66,7 +66,7 @@ DESTDIR =
 CFLAGS = -g -O
 LOCAL_CFLAGS =  -DRL_LIBRARY_VERSION='"$(RL_LIBRARY_VERSION)"'
 CPPFLAGS = 
-LDFLAGS =   -g -O
+LDFLAGS =  -L./lib/termcap  -g -O
 
 DEFS = -DHAVE_CONFIG_H 
 LOCAL_DEFS = 
@@ -85,7 +85,7 @@ SHOBJ_LDFLAGS = -shared -Wl,-soname,$@
 SHOBJ_XLDFLAGS = 
 SHOBJ_LIBS = 
 
-SHLIB_XLDFLAGS =  -Wl,-rpath,$(libdir) -Wl,-soname,`basename $@ $(SHLIB_MINOR)`
+SHLIB_XLDFLAGS =  -L./lib/termcap -Wl,-rpath,$(libdir) -Wl,-soname,`basename $@ $(SHLIB_MINOR)`
 SHLIB_LIBS = 
 
 SHLIB_DOT = .

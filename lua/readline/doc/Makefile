@@ -46,10 +46,10 @@ DESTDIR =
 SHELL = /bin/sh
 RM = rm -f
 
-INSTALL = /usr/bin/install -c
+INSTALL = /bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 
-BUILD_DIR = /home/yoyu/hub/readline
+BUILD_DIR = /home/yoyu/hub/testcode/lua/readline
 TEXINPUTDIR = $(srcdir)
 
 MAKEINFO    = LANGUAGE= makeinfo
