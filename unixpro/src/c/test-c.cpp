@@ -91,6 +91,25 @@ int printfTest(void) {
 
     return 0;
 }
+
+int switchTest(int tag) {
+    const int i = 0;
+    switch ( tag )
+    {
+        case 1:
+            printf("case 1:   %d + %d is %d\n", i, tag, i + tag);
+            break;
+        case 100:
+            printf("case 100: %d + %d is %d\n", i, tag, i + tag);
+            break;
+        default:
+            printf("default:  %d + %d is %d\n", i, 10000, i + 10000);
+            break;
+    }
+    return 0;
+}
+
+
 int main(int argc, char *argv[])
 {
     //vartest();
@@ -104,6 +123,10 @@ int main(int argc, char *argv[])
     //sizeofTest();
     //definetest2();
     //definetest3();
-    printfTest();
+    //printfTest();
+    switchTest(1);
+    switchTest(2);
+    switchTest(3);
+    switchTest(100);
 }
 
