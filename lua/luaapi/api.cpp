@@ -61,19 +61,18 @@ int test1(void)
 {
     char buff[256];
     int error;
-    lua_State *L = luaL_newstate();//lua_open();
-    luaopen_base(L);
-    // opens Lua 
-    // opens the basic library 
-    luaopen_table(L); // opens the table library 
-    luaopen_io(L); // opens the I/O library 
+    lua_State *L = luaL_newstate();//lua_open(); // opens Lua 
+    luaopen_base(L);   // opens the basic library 
+    luaopen_table(L);  // opens the table library 
+    luaopen_io(L);     // opens the I/O library 
     luaopen_string(L); // opens the string lib. 
-    luaopen_math(L); // opens the math lib. 
+    luaopen_math(L);   // opens the math lib. 
     while (fgets(buff, sizeof(buff), stdin) != NULL) {
-        error = luaL_loadbuffer(L, buff, strlen(buff),
-        "line") || lua_pcall(L, 0, 0, 0);
+        //Compile buff and execute chunk
+        error = luaL_loadbuffer(L, buff, strlen(buff), "line") || 
+                lua_pcall(L, 0, 0, 0);
         if (error) {
-            fprintf(stderr, "%s", lua_tostring(L, -1));
+            fprintf(stderr, "%s\n", lua_tostring(L, -1));
             lua_pop(L, 1);// pop error message from the stack
         }
     }
@@ -103,18 +102,17 @@ void error (lua_State *L, const char *fmt, ...) {
     vfprintf(stderr, fmt, vl);
     va_end(vl);
     lua_close(L);
-    printf ("\n");
     exit(EXIT_FAILURE);
-    printf ("\n");
+    printf ("won't print\n");
 }
 
 void test2(void)
 {
-    const char *fmt="%s";
-    const char *s="hello";
-    //int i =5;
+    const char *fmt = "%s %s";
+    const char *h = "Hello ";
+    const char *w = "world\n";
     lua_State *L = luaL_newstate();//lua_open();
-    error(L,fmt,s);
+    error(L, fmt, h, w);
     lua_close(L);
 }
 
@@ -317,10 +315,11 @@ int main(void)
 {
     //stackDumpTest();
     //test1();
+    test2();
     //printFloats (3,3.14159,2.71828,1.41421);
     //luaL_len_Test();
     //loadConf();
     //loadTable();
     //callf();
-    callf2();
+    //callf2();
 }
