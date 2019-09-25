@@ -8,7 +8,7 @@ using namespace std;
 
 static void stackDump(lua_State *L){
     int i;
-    int top = lua_gettop(L);
+    int top = lua_gettop(L);      //Return the number of elements.
     for(i = 1; i <= top; i++){
         int t = lua_type(L, i);
         switch(t){
@@ -25,11 +25,12 @@ static void stackDump(lua_State *L){
                 printf("%s", lua_typename(L, t));
                 break;
         }
-        printf("  ");
+        printf(" ");
     }
     printf("\n");
 }
 
+#define LUA_POP(L,n) lua_settop(L, -(n)-1)
 void stackDumpTest(void){
     lua_State *L = luaL_newstate();
 
@@ -37,21 +38,30 @@ void stackDumpTest(void){
     lua_pushnumber(L, 10);
     lua_pushnil(L);
     lua_pushstring(L, "yoyu");
-    stackDump(L);    // dump the stack
+    stackDump(L);         // dump the stack
 
-    lua_pushvalue(L, -4);// push the value of the index to the stack
+    lua_pushvalue(L, -4); // push the value of the index to the stack
     stackDump(L);
 
-    lua_replace(L, 3);  // pop a value and replace the index's
+    lua_replace(L, 3);    // pop a value and replace the index's
     stackDump(L);
 
-    lua_settop(L, 6);  // set the top index, fill 'nil'
+    lua_settop(L, 6);     // set the top index, fill 'nil'
     stackDump(L);
 
-    lua_remove(L, -3);  //
+    lua_remove(L, -3);    //
     stackDump(L);
 
-    lua_settop(L, -5);
+    lua_settop(L, -3);    //Count from top(0) to bottom(negative)
+    stackDump(L);
+
+    lua_settop(L, 2);     //Count from bottom(1) to top(positive)
+    stackDump(L);
+
+    lua_insert(L, -2);    // move top element to the bottom
+    stackDump(L);
+
+    LUA_POP(L, 1);
     stackDump(L);
 
     lua_close(L);
@@ -109,22 +119,32 @@ void error (lua_State *L, const char *fmt, ...) {
 void test2(void)
 {
     const char *fmt = "%s %s";
-    const char *h = "Hello ";
+    const char *H = "Hello ";
+    const char *h = "hello\n";
     const char *w = "world\n";
     lua_State *L = luaL_newstate();//lua_open();
-    error(L, fmt, h, w);
+    error(L, fmt, H, h, w);
     lua_close(L);
 }
 
-void luaL_len_Test(void)
+const char *luaL_len_Test(lua_State *L)
 {
-    lua_State *L = luaL_newstate();
     lua_pushstring(L, "yoyu");
     const char *s = lua_tostring(L, -1); /* any Lua string */
+    printf ("s is %s\n", s);
     size_t l = luaL_len(L, -1); /* its length */
-    printf ("%c\n", s[l]);
     assert(s[l] == '\0');
     assert(strlen(s) <= l);
+    return s;
+}
+
+void luaL_stack_Test(void)
+{
+    lua_State *L = luaL_newstate();
+    const char *r = luaL_len_Test(L);
+    printf ("r is %s\n", r);
+    const char *s = lua_tostring(L, -1); /* any Lua string */
+    printf ("s is %s\n", s);
     lua_close(L);
 }
 
@@ -313,11 +333,11 @@ double callf2 () {
 
 int main(void)
 {
-    //stackDumpTest();
+    stackDumpTest();
     //test1();
-    test2();
+    //test2();
     //printFloats (3,3.14159,2.71828,1.41421);
-    //luaL_len_Test();
+    //luaL_stack_Test();
     //loadConf();
     //loadTable();
     //callf();
