@@ -14,7 +14,7 @@ print("Hello from pp.lua")
 BLUE = {r=0.1, g=0.1, b=1}
 RED = {r=1, g=0.1, b=0}
 background = BLUE
---background = RED
+background = RED
 
 function f(x, y)
     return (x^2 )/(1 - y)

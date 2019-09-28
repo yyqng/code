@@ -1,34 +1,5 @@
-#include <stdio.h>
-#include <cstring>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <lua.hpp>
-using namespace std;
-
-static void stackDump(lua_State *L){
-    int i;
-    int top = lua_gettop(L);      //Return the number of elements.
-    for(i = 1; i <= top; i++){
-        int t = lua_type(L, i);
-        switch(t){
-            case LUA_TBOOLEAN:
-                printf(lua_toboolean(L, i) ? "true":"false");
-                break;
-            case LUA_TNUMBER:
-                printf("%g", lua_tonumber(L, i));
-                break;
-            case LUA_TSTRING:
-                printf("'%s'", lua_tostring(L, i));
-                break;
-            default:
-                printf("%s", lua_typename(L, t));
-                break;
-        }
-        printf(" ");
-    }
-    printf("\n");
-}
+#include "tool.h"
+#include "color.h"
 
 #define LUA_POP(L,n) lua_settop(L, -(n)-1)
 void stackDumpTest(void){
@@ -106,16 +77,6 @@ void printFloats (int n, ...)
   printf ("\n");
 }
 
-void error (lua_State *L, const char *fmt, ...) {
-    va_list vl;
-    va_start(vl, fmt);
-    vfprintf(stderr, fmt, vl);
-    va_end(vl);
-    lua_close(L);
-    exit(EXIT_FAILURE);
-    printf ("won't print\n");
-}
-
 void test2(void)
 {
     const char *fmt = "%s %s";
@@ -139,100 +100,6 @@ void lualenTest()
     lua_close(L);
 }
 
-void loadConf () {
-    lua_State *L = luaL_newstate();
-    //Optionnal, but good practice?
-    luaL_openlibs(L);      // This is necessary for os.genenv(DISPALY)
-    //luaopen_base(L);
-    //luaopen_io(L);
-    //luaopen_string(L);
-    //luaopen_math(L);
-    char filename[] = "pp.lua";
-    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0)) {
-        error(L, "cannot run configuration file: %s\n", lua_tostring(L, -1));
-    }
-
-    lua_getglobal(L, "width");
-    lua_getglobal(L, "height");
-    if (!lua_isnumber(L, -2))
-        error(L, "`width' should be a number\n");
-    if (!lua_isnumber(L, -1))
-        error(L, "`height' should be a number\n");
-    int width = (int)lua_tonumber(L, -2);
-    int height = (int)lua_tonumber(L, -1);
-    lua_close(L);
-    printf ("filename = %s, width = %d, height = %d\n", filename, width, height);
-}
-
-#define MAX_COLOR 255
-/* assume that table is on the stack top */
-int getfield (lua_State *L, const char *key) {
-    int result;
-    lua_pushstring(L, key);
-    lua_gettable(L, -2); /* push background[key] and remove key*/
-
-    if (!lua_isnumber(L, -1))
-        error(L, "invalid component in background color");
-    result = lua_tonumber(L, -1) * MAX_COLOR;
-    lua_pop(L, 1); /* remove number */
-    return result;
-}
-
-void loadTable () {
-    char filename[] = "pp.lua";
-    lua_State *L = luaL_newstate();
-    //Optionnal, but good practice?
-    luaL_openlibs(L);      // This is necessary for os.genenv(DISPALY)
-    //luaopen_base(L);
-    //luaopen_io(L);
-    //luaopen_string(L);
-    //luaopen_math(L);
-    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0)) {
-        error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
-    }
-
-    lua_getglobal(L, "background");
-    if (!lua_istable(L, -1))
-        error(L, "`background' is not a valid color table");
-    int red = getfield(L, "r");
-    int green = getfield(L, "g");
-    int blue = getfield(L, "b");
-
-//    lua_pushstring(L, "r");
-//    lua_gettable(L, -2);
-//    lua_pushstring(L, "g");
-//    lua_gettable(L, -3);
-//    lua_pushstring(L, "b");
-//    lua_gettable(L, -4);
-//    if (!lua_isnumber(L, -1) || !lua_isnumber(L, -2) || !lua_isnumber(L, -3))
-//    {
-//        error(L, "color field should be a number");
-//    }
-//    int red = lua_tonumber(L, -3);
-//    int green = lua_tonumber(L, -2);
-//    int blue = lua_tonumber(L, -1);
-    printf ("r = %d, g = %d, b = %d\n", red, green, blue);
-    lua_close(L);
-}
-
-/* call a function `f' defined in Lua */
-double f (lua_State *L, double x, double y) {
-    /* push functions and arguments */
-    lua_getglobal(L, "f"); /* function to be called */
-    lua_pushnumber(L, x); /* push 1st argument */
-    lua_pushnumber(L, y); /* push 2nd argument */
-    /* do the call (2 arguments, 1 result) */
-    if (lua_pcall(L, 2, 1, 0) != 0)
-        error(L, "error running function `f': %s",
-    lua_tostring(L, -1));
-    /* retrieve result */
-    if (!lua_isnumber(L, -1))
-        error(L, "function `f' must return a number");
-    double z = lua_tonumber(L, -1);
-    lua_pop(L, 1); /* pop returned value */
-    return z;
-}
-
 double callf () {
     char filename[] = "pp.lua";
     lua_State *L = luaL_newstate();
@@ -245,9 +112,9 @@ double callf () {
 
     double x = 3.0;
     double y = 2.0;
-    double z = f(L, x, y);
+    double z = tool_callf(L, x, y);
     lua_close(L);
-    printf ("filename = %s, f(x, y) = %f\n", filename, z);
+    printf ("filename = %s, tool_callf(x, y) = %f\n", filename, z);
     return z;
 }
 
@@ -321,9 +188,9 @@ double callf2 () {
     double x = 3.0;
     double y = 2.0;
     double z = 0;
-    call_va(L, "f", "dd>d", x, y, &z);//f(L, x, y);
+    call_va(L, "tool_callf", "dd>d", x, y, &z);//tool_callf(L, x, y);
     lua_close(L);
-    printf ("filename = %s, f(x, y) = %f\n", filename, z);
+    printf ("filename = %s, tool_callf(x, y) = %f\n", filename, z);
     return z;
 }
 

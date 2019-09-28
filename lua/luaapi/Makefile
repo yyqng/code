@@ -1,4 +1,4 @@
-OBJ=api.o
+OBJ=api.o tool.o color.o
 TARGET=api.out
 #INCLUDE=../lua-5.2.2/src
 #LIB=../lua-5.2.2/src
