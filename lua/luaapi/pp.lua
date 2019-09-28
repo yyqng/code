@@ -1,12 +1,20 @@
 -- configuration file for program `pp'
 -- define window size
-width = 9000
-height= 1.2e3
+
+require "os"
+
+if os.getenv("DISPLAY") == ":0.0" then
+    width = 9000; height= 1.2e3
+else
+    width = 200; height = 200
+end
+
+print("Hello from pp.lua")
 
 BLUE = {r=0.1, g=0.1, b=1}
 RED = {r=1, g=0.1, b=0}
---background = BLUE
-background = RED
+background = BLUE
+--background = RED
 
 function f(x, y)
     return (x^2 )/(1 - y)

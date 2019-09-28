@@ -127,51 +127,30 @@ void test2(void)
     lua_close(L);
 }
 
-const char *luaL_len_Test(lua_State *L)
+void lualenTest()
 {
+    lua_State *L = luaL_newstate();
     lua_pushstring(L, "yoyu");
     const char *s = lua_tostring(L, -1); /* any Lua string */
     printf ("s is %s\n", s);
     size_t l = luaL_len(L, -1); /* its length */
     assert(s[l] == '\0');
     assert(strlen(s) <= l);
-    return s;
-}
-
-void luaL_stack_Test(void)
-{
-    lua_State *L = luaL_newstate();
-    const char *r = luaL_len_Test(L);
-    printf ("r is %s\n", r);
-    const char *s = lua_tostring(L, -1); /* any Lua string */
-    printf ("s is %s\n", s);
     lua_close(L);
 }
 
-#define MAX_COLOR 255
-/* assume that table is on the stack top */
-int getfield (lua_State *L, const char *key) {
-    int result;
-    lua_pushstring(L, key);
-    lua_gettable(L, -2); /* get background[key] */
-    if (!lua_isnumber(L, -1))
-        error(L, "invalid component in background color");
-    result = lua_tonumber(L, -1) * MAX_COLOR;
-    lua_pop(L, 1); /* remove number */
-    return result;
-}
-
 void loadConf () {
-    char filename[] = "pp.conf";
-    int width = 0;
-    int height = 0;
     lua_State *L = luaL_newstate();
-    luaopen_base(L);
-    luaopen_io(L);
-    luaopen_string(L);
-    luaopen_math(L);
-    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0))
-        error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
+    //Optionnal, but good practice?
+    luaL_openlibs(L);      // This is necessary for os.genenv(DISPALY)
+    //luaopen_base(L);
+    //luaopen_io(L);
+    //luaopen_string(L);
+    //luaopen_math(L);
+    char filename[] = "pp.lua";
+    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0)) {
+        error(L, "cannot run configuration file: %s\n", lua_tostring(L, -1));
+    }
 
     lua_getglobal(L, "width");
     lua_getglobal(L, "height");
@@ -179,21 +158,38 @@ void loadConf () {
         error(L, "`width' should be a number\n");
     if (!lua_isnumber(L, -1))
         error(L, "`height' should be a number\n");
-    width = (int)lua_tonumber(L, -2);
-    height = (int)lua_tonumber(L, -1);
+    int width = (int)lua_tonumber(L, -2);
+    int height = (int)lua_tonumber(L, -1);
     lua_close(L);
     printf ("filename = %s, width = %d, height = %d\n", filename, width, height);
 }
 
+#define MAX_COLOR 255
+/* assume that table is on the stack top */
+int getfield (lua_State *L, const char *key) {
+    int result;
+    lua_pushstring(L, key);
+    lua_gettable(L, -2); /* push background[key] and remove key*/
+
+    if (!lua_isnumber(L, -1))
+        error(L, "invalid component in background color");
+    result = lua_tonumber(L, -1) * MAX_COLOR;
+    lua_pop(L, 1); /* remove number */
+    return result;
+}
+
 void loadTable () {
-    char filename[] = "pp.conf";
+    char filename[] = "pp.lua";
     lua_State *L = luaL_newstate();
-    luaopen_base(L);
-    luaopen_io(L);
-    luaopen_string(L);
-    luaopen_math(L);
-    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0))
+    //Optionnal, but good practice?
+    luaL_openlibs(L);      // This is necessary for os.genenv(DISPALY)
+    //luaopen_base(L);
+    //luaopen_io(L);
+    //luaopen_string(L);
+    //luaopen_math(L);
+    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0)) {
         error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
+    }
 
     lua_getglobal(L, "background");
     if (!lua_istable(L, -1))
@@ -238,7 +234,7 @@ double f (lua_State *L, double x, double y) {
 }
 
 double callf () {
-    char filename[] = "pp.conf";
+    char filename[] = "pp.lua";
     lua_State *L = luaL_newstate();
     luaopen_base(L);
     luaopen_io(L);
@@ -313,7 +309,7 @@ void call_va (lua_State *L, const char *func, const char *sig, ...) {
 }
 
 double callf2 () {
-    char filename[] = "pp.conf";
+    char filename[] = "pp.lua";
     lua_State *L = luaL_newstate();
     luaopen_base(L);
     luaopen_io(L);
@@ -333,13 +329,13 @@ double callf2 () {
 
 int main(void)
 {
-    stackDumpTest();
+    //stackDumpTest();
     //test1();
     //test2();
     //printFloats (3,3.14159,2.71828,1.41421);
-    //luaL_stack_Test();
+    //lualenTest();
     //loadConf();
-    //loadTable();
+    loadTable();
     //callf();
     //callf2();
 }
