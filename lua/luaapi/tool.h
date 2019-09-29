@@ -15,6 +15,7 @@ void stackDump(lua_State *L);
 void error (lua_State *L, const char *fmt, ...);
 
 /* call a function `f' defined in Lua */
-double tool_callf (lua_State *L, double x, double y);
+double callLuaf (lua_State *L, double x, double y);
+void callLuafV2(lua_State *L, const char *func, const char *sig, ...);
 
 #endif
