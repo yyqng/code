@@ -1,4 +1,3 @@
-#include "tool.h"
 #include "color.h"
 
 #define LUA_POP(L,n) lua_settop(L, -(n)-1)

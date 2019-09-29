@@ -1,4 +1,3 @@
-#include "tool.h"
 #include "color.h"
 
 void loadConf () {
@@ -43,6 +42,15 @@ void setcolor (lua_State *L, struct ColorTable *ct) {
 
 void register_color()
 {
+    struct ColorTable colortable[] = {
+        {"WHITE",  MAX_COLOR, MAX_COLOR, MAX_COLOR},
+        {"RED",    MAX_COLOR, 0,         0},
+        {"GREEN",  0,         MAX_COLOR, 0},
+        {"BLUE",   0,         0,         MAX_COLOR},
+        {"BLACK",  0,         0,         0},
+        {NULL,     0,         0,         0} /* sentinel */
+    };
+
     lua_State *L = luaL_newstate();
     int i = 0;
     while (colortable[i].name != NULL)

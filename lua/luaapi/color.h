@@ -1,20 +1,14 @@
-#include "tool.h"
-
+#pragma once
 #ifndef _COLOR_H
-#define
+#define _COLOR_H
+
+#include "tool.h"
 
 #define MAX_COLOR 255
 
 struct ColorTable {
     const char *name;
     unsigned char red, green, blue;
-} colortable[] = {
-    {"WHITE",  MAX_COLOR, MAX_COLOR, MAX_COLOR},
-    {"RED",    MAX_COLOR, 0,         0},
-    {"GREEN",  0,         MAX_COLOR, 0},
-    {"BLUE",   0,         0,         MAX_COLOR},
-    {"BLACK",  0,         0,         0},
-    {NULL,     0,         0,         0} /* sentinel */
 };
 
 void loadConf ();
