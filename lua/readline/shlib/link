@@ -1,7 +1,7 @@
 #/bin/bash
 #ln -s libhistory.so.8.0 libhistory.so
 #ln -s libreadline.so.8.0 libreadline.so
-ln -s libhistory.so.8.0 libhistory.so.8
-ln -s libreadline.so.8.0 libreadline.so.8
+ln -s libhistory.so.8.0 libhistory.so
+ln -s libreadline.so.8.0 libreadline.so
 #cp libhistory.so.8.0 libhistory.so
 #cp libreadline.so.8.0 libreadline.so
