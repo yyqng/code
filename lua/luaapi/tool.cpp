@@ -34,10 +34,10 @@ void error (lua_State *L, const char *fmt, ...) {
     printf ("won't print\n");
 }
 
-/* call a function `f' defined in Lua */
+/* call a function `Luaf' defined in Lua */
 double callLuaf(lua_State *L, double x, double y) {
     /* push functions and arguments */
-    lua_getglobal(L, "f"); /* function to be called */
+    lua_getglobal(L, "Luaf"); /* function to be called */
     lua_pushnumber(L, x); /* push 1st argument */
     lua_pushnumber(L, y); /* push 2nd argument */
     /* do the call (2 arguments, 1 result) */
@@ -54,12 +54,11 @@ double callLuaf(lua_State *L, double x, double y) {
 
 void callLuafV2(lua_State *L, const char *func, const char *sig, ...) {
     va_list vl;
-    int narg, nres;
-    /* number of arguments and results */
     va_start(vl, sig);
     lua_getglobal(L, func); /* get function */
+
     /* push arguments */
-    narg = 0;
+    int narg = 0;/* number of arguments */
     while (*sig) {
         /* push arguments */
         switch (*sig++) {
@@ -79,9 +78,11 @@ void callLuafV2(lua_State *L, const char *func, const char *sig, ...) {
         }
         narg++;
         luaL_checkstack(L, 1, "too many arguments");
-    } endwhile:
+    }
+
+endwhile:
     /* do the call */
-    nres = strlen(sig);
+    int nres = strlen(sig); /* number of results */
     /* number of expected results */
     if (lua_pcall(L, narg, nres, 0) != 0) /* do the call */
         error(L, "error running function `%s': %s", func, lua_tostring(L, -1));
@@ -108,4 +109,3 @@ void callLuafV2(lua_State *L, const char *func, const char *sig, ...) {
     }
     va_end(vl);
 }
-

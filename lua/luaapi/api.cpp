@@ -37,7 +37,7 @@ void stackDumpTest(void){
     lua_close(L);
 }
 /**/
-int test1(void)
+int exeInputLua(void)
 {
     char buff[256];
     int error;
@@ -47,6 +47,7 @@ int test1(void)
     luaopen_io(L);     // opens the I/O library 
     luaopen_string(L); // opens the string lib. 
     luaopen_math(L);   // opens the math lib. 
+    printf("Please input lua script:\n");
     while (fgets(buff, sizeof(buff), stdin) != NULL) {
         //Compile buff and execute chunk
         error = luaL_loadbuffer(L, buff, strlen(buff), "line") || 
@@ -99,7 +100,7 @@ void lualenTest()
     lua_close(L);
 }
 
-double callf () {
+double callfLuafTest () {
     char filename[] = "pp.lua";
     lua_State *L = luaL_newstate();
     luaopen_base(L);
@@ -111,40 +112,23 @@ double callf () {
 
     double x = 3.0;
     double y = 2.0;
+    double zV2 = 0;
+    callLuafV2(L, "Luaf", "dd>d", x, y, &zV2);//call Luaf(L, x, y);
     double z =  callLuaf(L, x, y);
     lua_close(L);
-    printf ("filename = %s, callLuaf(x, y) = %f\n", filename, z);
-    return z;
-}
-
-double callf2 () {
-    char filename[] = "pp.lua";
-    lua_State *L = luaL_newstate();
-    luaopen_base(L);
-    luaopen_io(L);
-    luaopen_string(L);
-    luaopen_math(L);
-    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0))
-        error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
-
-    double x = 3.0;
-    double y = 2.0;
-    double z = 0;
-    callLuafV2(L, "Luaf", "dd>d", x, y, &z);//call Luaf(L, x, y);
-    lua_close(L);
-    printf ("filename = %s, Luaf(x, y) = %f\n", filename, z);
+    printf ("In %s, Luaf(%f, %f) = %f\n", filename, x, y, z);
+    printf ("In %s, Luaf(%f, %f) = %f\n", filename, x, y, zV2);
     return z;
 }
 
 int main(void)
 {
     //stackDumpTest();
-    //test1();
+    //exeInputLua();
     //test2();
     //printFloats (3,3.14159,2.71828,1.41421);
     //lualenTest();
     //loadConf();
     //loadTable();
-    //callf();
-    callf2();
+    callfLuafTest();
 }
