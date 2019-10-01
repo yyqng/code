@@ -1,4 +1,5 @@
 --Name of this file can't be lualib.lua because of lualib.so
+package.cpath = package.path..";/home/yoyu/hub/testcode/lua/capi/?.so"
 local lib = require "mylib"
 
 l_mapTest = function()
@@ -73,9 +74,9 @@ metaTest = function()
     --> 3.4
 end
 
---print(type(lib))
---print(lib.l_sum(23,17))
---print(lib.l_sin(3.14159265354))
+print(type(lib))
+print(lib.l_sum(23,17))
+print(lib.l_sin(3.14159265354))
 --print(mysin(3.14159265354))
 --print(lib.l_dir("."))
 --l_mapTest() 
@@ -86,4 +87,4 @@ end
 --l_ctableBadTest(2)
 --l_ctableTestV2(2)     --------wrong
 --l_ctableBadTestV2(2)
-metaTest()
+--metaTest()
