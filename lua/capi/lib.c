@@ -49,16 +49,25 @@ static int dir (lua_State *L) {
  
 int map (lua_State *L) {
     int i, n;
-    /* 1st argument must be a table (t) */
+    /* 1st argument must be a table */
     luaL_checktype(L, 1, LUA_TTABLE);
-    /* 2nd argument must be a function (f) */
+    /* 2nd argument must be a function */
     luaL_checktype(L, 2, LUA_TFUNCTION);
-    n = lua_rawlen(L, 1); /* get size of table */
+    n = lua_rawlen(L, 1);          // get size of table 
     for (i=1; i<=n; i++) {
-        lua_pushvalue(L, 2); /* push f */
-        lua_rawgeti(L, 1, i); /* push t[i] */
-        lua_call(L, 1, 1); /* call f(t[i]) */
-        lua_rawseti(L, 1, i); /* t[i] = result */
+        lua_pushvalue(L, 2);       // push function
+
+        lua_rawgeti(L, 1, i);    // push table[i]. equal to call:
+        //lua_pushnumber(L, i);
+        //lua_rawget(L, 1);
+
+        lua_call(L, 1, 1);         // call function(table[i]) and push result
+
+        lua_rawseti(L, 1, i);    // table[i] = result. equal to call:
+        //lua_pushnumber(L, i);
+        //lua_insert(L, -2);
+        //lua_rawset(L, 1);
+
     }
     return 0; /* no results */
 }
@@ -211,28 +220,30 @@ static int getarrayV2 (lua_State *L) {
     return 1;
 }
 
+//Name of array mylib can be changed.
 static const struct luaL_Reg mylib[] = {
-    {"l_sum" , sum},
-    {"l_sin" , mysin},
-    {"l_dir" , dir},
-    {"l_map" , map},
-    {"l_split" , split},
-    {"l_ctest" , ctest},
+    {"lsum" , sum},
+    {"lsin" , mysin},
+    {"ldir" , dir},
+    {"lmap" , map},
+    {"lsplit" , split},
+    {"lctest" , ctest},
 
-    {"l_newarray" , newarray},
-    {"l_setarray" , setarray},
-    {"l_getarray" , getarray},
-    {"l_getsize" , getsize},
+    {"lnewarray" , newarray},
+    {"lsetarray" , setarray},
+    {"lgetarray" , getarray},
+    {"lgetsize" , getsize},
 
-    {"l_newarrayV2" , newarrayV2},
-    {"l_setarrayV2" , setarrayV2},
-    {"l_getarrayV2" , getarrayV2},
-    {"l_getsizeV2" , getsizeV2},
+    {"lnewarrayV2" , newarrayV2},
+    {"lsetarrayV2" , setarrayV2},
+    {"lgetarrayV2" , getarrayV2},
+    {"lgetsizeV2" , getsizeV2},
 
     {NULL, NULL}
 };
  
-int luaopen_mylib(lua_State *L){
+//Function name can not be changed.
+int luaopen_lib(lua_State *L){ 
     luaL_newlib(L, mylib); // 5.2
     return 1;
 }

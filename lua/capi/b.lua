@@ -1,7 +1,12 @@
 --Usage1:
-package.path = package.path..";/home/yoyu/hub/testcode/lua/capi/?.lua"
-require("a")
---1. Set LUA_PATH=.
+--
+--1. Set env:
+--package.path = package.path..";/home/yoyu/hub/testcode/lua/capi/?.lua"
+--require("a") --optional?
+--
+--or in .bashrc:
+--export LUA_PATH="$TESTCODE_PATH/lua/?.lua;$TESTCODE_PATH/lua/capi/?.lua"
+--
 --2. execute this script: lua -la -lb
 --
 --
