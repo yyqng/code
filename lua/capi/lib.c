@@ -56,18 +56,14 @@ int map (lua_State *L) {
     n = lua_rawlen(L, 1);          // get size of table 
     for (i=1; i<=n; i++) {
         lua_pushvalue(L, 2);       // push function
-
-        lua_rawgeti(L, 1, i);    // push table[i]. equal to call:
+        lua_rawgeti(L, 1, i);      // push table[i]. equal to call:
         //lua_pushnumber(L, i);
         //lua_rawget(L, 1);
-
         lua_call(L, 1, 1);         // call function(table[i]) and push result
-
-        lua_rawseti(L, 1, i);    // table[i] = result. equal to call:
+        lua_rawseti(L, 1, i);      // table[i] = result. equal to call:
         //lua_pushnumber(L, i);
         //lua_insert(L, -2);
         //lua_rawset(L, 1);
-
     }
     return 0; /* no results */
 }
@@ -80,7 +76,7 @@ static int split (lua_State *L) {
     lua_newtable(L); /* result */
     /* repeat for each separator */
     while ((e = strchr(s, *sep)) != NULL) {
-        lua_pushlstring(L, s, e-s); /* push substring */
+        lua_pushlstring(L, s, e - s); /* push substring */
         lua_rawseti(L, -2, i++);
         printf("%s\n",e);
         s = e + 1; /* skip separator */

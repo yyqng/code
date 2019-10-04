@@ -12,8 +12,8 @@ local lib = require "lib"
 
 l_mapTest = function()
     mytable = {}
-    mytable[1]= "element 1"
-    mytable[2]= "element 2"
+    mytable[1]= "initial element 1"
+    mytable[2]= "initial element 2"
     myprint = function(param)
        print("myprint:",param)
        return 1111
