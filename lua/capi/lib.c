@@ -87,42 +87,67 @@ static int split (lua_State *L) {
     return 1; /* return the table */
 }
 
-int ctest(lua_State *L)
+int regref1(lua_State *L)
 {
-
-    static const char kKey = 'K';
-    static const char kkkkk[] = "kkkkk";
     /* store a string*/
-    lua_pushlightuserdata(L, (void *)&kKey); /* push address */
-    lua_pushstring(L, kkkkk);
-    /* push value */
-    /* registry[&kKey] = myNumber */
-    lua_settable(L, LUA_REGISTRYINDEX);
+    //static const char key1 = 'k';
+    int key1 = luaL_ref(L, LUA_REGISTRYINDEX);
+    //lua_rawgeti(L, LUA_REGISTRYINDEX, key1);
+    //printf("key1 = %f\n",lua_tonumber(L, -1));
+    char kstring[] = "kstring";
+    lua_pushlightuserdata(L, (void *)&key1);  /* push address */
+    lua_pushstring(L,  kstring);              /* push value */
+    lua_settable(L, LUA_REGISTRYINDEX);       /* registry[&key1] =  kstring*/
+    /* retrieve a string*/
+    lua_pushlightuserdata(L, (void *)&key1);  /* push address */
+    lua_gettable(L, LUA_REGISTRYINDEX);       /* retrieve value */
+    const char *s = lua_tostring(L, -1);      /* convert to string*/
+    printf("kstring = registry[&%d] = %s\n", key1, s);
 
-    /* variable with an unique address */
-    static const char Key = 'k';
-    int myNumber = 1111;
     /* store a number */
-    lua_pushlightuserdata(L, (void *)&Key); /* push address */
-    lua_pushnumber(L, myNumber);
-    /* push value */
-    /* registry[&Key] = myNumber */
-    lua_settable(L, LUA_REGISTRYINDEX);
+    //static const char key2 = 'k';
+    int key2 = luaL_ref(L, LUA_REGISTRYINDEX);
+    int knumber = 1111;
+    lua_pushlightuserdata(L, (void *)&key2);  /* push address */
+    lua_pushnumber(L, knumber);               /* push value */
+    lua_settable(L, LUA_REGISTRYINDEX);       /* registry[&key2] = knumber */
+    /* retrieve a number */
+    lua_pushlightuserdata(L, (void *)&key2);  /* push address */
+    lua_gettable(L, LUA_REGISTRYINDEX);       /* retrieve value */
+    knumber = lua_tonumber(L, -1);            /* convert to number */
+    printf("knumber = registry[&%d] = %d\n", key2, knumber);
+
+    luaL_unref(L, LUA_REGISTRYINDEX, key1);
+    luaL_unref(L, LUA_REGISTRYINDEX, key2);
+    return 1; /* return the table */
+}
+
+int regref2(lua_State *L)
+{
+    /* retrieve a string*/
+    //static const char key1 = 'k';
+    int key1 = -1;
+    lua_pushlightuserdata(L, (void *)&key1);  /* push address */
+    lua_gettable(L, LUA_REGISTRYINDEX);       /* retrieve value */
+    const char *s = lua_tostring(L, -1);      /* convert to string*/
+    printf("kstring = registry[&%d] = %s\n", key1, s);
 
     /* retrieve a number */
-    lua_pushlightuserdata(L, (void *)&Key);
-    /* push address */
-    lua_gettable(L, LUA_REGISTRYINDEX); /* retrieve value */
-    myNumber = lua_tonumber(L, -1); /* convert to number */
-    printf("myNumber = %d\n", myNumber);
+    //static const char key2 = 'k';
+    int key2 = 4;
+    lua_pushlightuserdata(L, (void *)&key2);  /* push address */
+    lua_gettable(L, LUA_REGISTRYINDEX);       /* retrieve value */
+    int knumber = lua_tonumber(L, -1);            /* convert to number */
+    printf("knumber = registry[&%d] = %d\n", key2, knumber);
+    return 1; /* return the table */
+}
 
-    /* retrieve a string*/
-    lua_pushlightuserdata(L, (void *)&kKey);
-    /* push address */
-    lua_gettable(L, LUA_REGISTRYINDEX); /* retrieve value */
-    const char *s = lua_tostring(L, -1); /* convert to number */
-    printf("s = %s\n", s);
-
+int regref(lua_State *L)
+{
+    regref1(L);
+    //regref2(L);
+    regref1(L);
+   // regref2(L);
     return 1; /* return the table */
 }
 
@@ -223,7 +248,7 @@ static const struct luaL_Reg mylib[] = {
     {"ldir" , dir},
     {"lmap" , map},
     {"lsplit" , split},
-    {"lctest" , ctest},
+    {"lregref" ,  regref},
 
     {"lnewarray" , newarray},
     {"lsetarray" , setarray},

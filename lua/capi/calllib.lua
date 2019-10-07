@@ -16,7 +16,7 @@ l_mapTest = function()
     mytable[2]= "initial element 2"
     myprint = function(param)
        print("myprint:",param)
-       return 1111
+       return 2222
     end
     lib.lmap(mytable, myprint)
     print("l_mapTest:", mytable[1], mytable[2])
@@ -89,9 +89,9 @@ end
 --print(lib.lsin(3.14159265354))
 --print(mysin(3.14159265354))
 --print(lib.ldir("."))
-l_mapTest() 
+--l_mapTest() 
 --print(lib.lsplit("hi,,there", ","))
---print(lib.lctest())
+lib.lregref()
 --l_stdinTest()
 --l_ctableTest(2)
 --l_ctableBadTest(2)
