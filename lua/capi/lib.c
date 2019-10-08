@@ -179,8 +179,7 @@ static int getarray (lua_State *L) {
     NumArray *a = (NumArray *)lua_touserdata(L, 1);
     int index = luaL_checkint(L, 2);
     luaL_argcheck(L, a != NULL, 1, "'array' expected");
-    luaL_argcheck(L, 1 <= index && index <= a->size, 2,
-    "index out of range");
+    luaL_argcheck(L, 1 <= index && index <= a->size, 2, "index out of range");
     lua_pushnumber(L, a->values[index-1]);
     return 1;
 }
@@ -193,7 +192,7 @@ static int getsize (lua_State *L) {
 }
 
 int luaopen_array (lua_State *L) {
-    luaL_newmetatable(L, "LuaBook.array");
+    luaL_newmetatable(L, "luaBook.array");
     //luaL_openlibs(L, "array", arraylib, 0);
     luaL_openlibs(L);
     return 1;
@@ -203,14 +202,15 @@ static int newarrayV2 (lua_State *L) {
     int n = luaL_checkint(L, 1);
     size_t nbytes = sizeof(NumArray) + (n - 1)*sizeof(double);
     NumArray *a = (NumArray *)lua_newuserdata(L, nbytes);
-    luaL_getmetatable(L, "LuaBook.array");
+    luaL_newmetatable(L, "luaBook.array");
+    //luaL_getmetatable(L, "luaBook.array");
     lua_setmetatable(L, -2);
     a->size = n;
     return 1; /* new userdatum is already on the stack */
 }
 
 static NumArray *checkarray (lua_State *L) {
-    void *ud = luaL_checkudata(L, 1, "LuaBook.array");
+    void *ud = luaL_checkudata(L, 1, "luaBook.array");
     luaL_argcheck(L, ud != NULL, 1, "`array' expected");
     return (NumArray *)ud;
 }
@@ -224,10 +224,8 @@ static int getsizeV2 (lua_State *L) {
 static double *getelem (lua_State *L) {
     NumArray *a = checkarray(L);
     int index = luaL_checkint(L, 2);
-    luaL_argcheck(L, 1 <= index && index <= a->size, 2,
-    "index out of range");
-    /* return element address */
-    return &a->values[index - 1];
+    luaL_argcheck(L, 1 <= index && index <= a->size, 2, "index out of range");
+    return &a->values[index - 1];    // return element address.
 }
 
 static int setarrayV2 (lua_State *L) {

@@ -28,19 +28,9 @@ l_ctableTest = function(n)
         lib.lsetarray(ctable, i, i + 100)
     end
     for i=1,n do
-        print("ctable["..i.."] = ", lib.lgetarray(ctable, i))
+        print("ctable["..i.."] = "..lib.lgetarray(ctable, i))
     end
     print("Size of ctable:", lib.lgetsize(ctable))
-end
-
-l_ctableBadTest = function(n)
-    for i=1,n do
-        lib.lsetarray(io.stdin, i, i + 100)
-    end
-    for i=1,n do
-        print("io.stdin["..i.."] = ", lib.lgetarray(io.stdin, i))
-    end
-    print("Size of io.stdin:", lib.lgetsize(io.stdin))
 end
 
 l_stdinTest = function()
@@ -49,30 +39,25 @@ l_stdinTest = function()
 end
 
 l_ctableTestV2 = function(n)
-    mt={__name="LuaBook.array"}
-    --mt={__name="Luook.array"}
-    ctable={}
-    setmetatable(ctable,mt)
-    print(type(ctable),ctable)
-
---    local ctable = lib.lnewarrayV2(n)
+    local ctable = lib.lnewarrayV2(n)
     for i=1,n do
         lib.lsetarrayV2(ctable, i, i + 100)
     end
     for i=1,n do
-        print("ctable["..i.."] = ", lib.lgetarrayV2(ctable, i))
+        print("ctable["..i.."] = "..lib.lgetarrayV2(ctable, i))
     end
     print("Size of ctable:", lib.lgetsizeV2(ctable))
 end
 
-l_ctableBadTestV2 = function(n)
+l_ctableBadTest = function(n)
     for i=1,n do
+        --lib.lsetarray(io.stdin, i, i + 100)
         lib.lsetarrayV2(io.stdin, i, i + 100)
     end
     for i=1,n do
-        print("io.stdin["..i.."] = ", lib.lgetarrayV2(io.stdin, i))
+        print("io.stdin["..i.."] = "..lib.lgetarray(io.stdin, i))
     end
-    print("Size of io.stdin:", lib.lgetsizeV2(io.stdin))
+    print("Size of io.stdin:", lib.lgetsize(io.stdin))
 end
 
 metaTest = function()
@@ -91,10 +76,10 @@ end
 --print(lib.ldir("."))
 --l_mapTest() 
 --print(lib.lsplit("hi,,there", ","))
-lib.lregref()
+--lib.lregref()
 --l_stdinTest()
 --l_ctableTest(2)
---l_ctableBadTest(2)
---l_ctableTestV2(2)     --------wrong
+--l_ctableTestV2(2)
+l_ctableBadTest(2)
 --l_ctableBadTestV2(2)
 --metaTest()
