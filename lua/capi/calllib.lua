@@ -22,7 +22,7 @@ l_mapTest = function()
     print("l_mapTest:", mytable[1], mytable[2])
 end
 
-l_ctableTest = function(n)
+l_ctableTestV1 = function(n)
     local ctable = lib.lnewarray(n)
     for i=1,n do
         lib.lsetarray(ctable, i, i + 100)
@@ -31,11 +31,6 @@ l_ctableTest = function(n)
         print("ctable["..i.."] = "..lib.lgetarray(ctable, i))
     end
     print("Size of ctable:", lib.lgetsize(ctable))
-end
-
-l_stdinTest = function()
-    io.stdin="in"
-    print("io.stdin = ", io.stdin)
 end
 
 l_ctableTestV2 = function(n)
@@ -49,9 +44,18 @@ l_ctableTestV2 = function(n)
     print("Size of ctable:", lib.lgetsizeV2(ctable))
 end
 
-l_ctableBadTest = function(n)
+l_ctableBadTestV1 = function(n)
     for i=1,n do
-        --lib.lsetarray(io.stdin, i, i + 100)
+        lib.lsetarray(io.stdin, i, i + 100)
+    end
+    for i=1,n do
+        print("io.stdin["..i.."] = "..lib.lgetarray(io.stdin, i))
+    end
+    print("Size of io.stdin:", lib.lgetsize(io.stdin))
+end
+
+l_ctableBadTestV2 = function(n)
+    for i=1,n do
         lib.lsetarrayV2(io.stdin, i, i + 100)
     end
     for i=1,n do
@@ -60,13 +64,27 @@ l_ctableBadTest = function(n)
     print("Size of io.stdin:", lib.lgetsize(io.stdin))
 end
 
-metaTest = function()
+l_ctableTest = function(n)
+    print("l_ctableTestV1:")
+    l_ctableTestV1(n)
+    print("l_ctableTestV2:")
+    l_ctableTestV2(n)
+    print("l_ctableBadTestV2:")
+    l_ctableBadTestV2(n)
+    print("l_ctableBadTestV1:")
+    l_ctableBadTestV1(n)
+end
+
+l_stdinTest = function()
+    io.stdin="in"
+    print("io.stdin = ", io.stdin)
+end
+
+l_classTest = function()
     a = array.new(1000)
-    print(a:size())
-    --> 1000
+    print(a:size()) --> 1000
     a:set(10, 3.4)
-    print(a:get(10))
-    --> 3.4
+    print(a:get(10)) --> 3.4
 end
 
 --print(type(lib))
@@ -77,9 +95,6 @@ end
 --l_mapTest() 
 --print(lib.lsplit("hi,,there", ","))
 --lib.lregref()
---l_stdinTest()
 --l_ctableTest(2)
---l_ctableTestV2(2)
-l_ctableBadTest(2)
---l_ctableBadTestV2(2)
---metaTest()
+--l_stdinTest()
+l_classTest()
