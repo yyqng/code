@@ -81,10 +81,17 @@ l_stdinTest = function()
 end
 
 l_classTest = function()
-    a = array.new(1000)
-    print(a:size()) --> 1000
-    a:set(10, 3.4)
-    print(a:get(10)) --> 3.4
+    local metaarray = getmetatable(array.new(1))
+    metaarray.__index = metaarray
+    metaarray.set = array.set
+    metaarray.size = array.size
+
+    a = array.new(100)
+    a[10] = 3.4
+    print(a[10])
+--    print(a:size()) --> 1000
+--    a:set(10, 3.4)
+--    print(a:get(10)) --> 3.4
 end
 
 --print(type(lib))
@@ -97,4 +104,4 @@ end
 --lib.lregref()
 --l_ctableTest(2)
 --l_stdinTest()
-l_classTest()
+l_classTest()   ------wrong

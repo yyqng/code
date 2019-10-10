@@ -32,25 +32,27 @@ int array2string (lua_State *L);
 
 //Name of array mylib can be changed.
 static const struct luaL_Reg mylib[] = {
-    {"lsum" , sum},
-    {"lsin" , mysin},
-    {"ldir" , dir},
-    {"lmap" , map},
-    {"lsplit" , split},
-    {"lregref" ,  regref},
+    {"lsum", sum},
+    {"lsin", mysin},
+    {"ldir", dir},
+    {"lmap", map},
+    {"lsplit", split},
+    {"lregref",  regref},
 
-    {"lnewarray" , newarray},
-    {"lsetarray" , setarray},
-    {"lgetarray" , getarray},
-    {"lgetsize" , getsize},
+    {"lnewarray", newarray},
+    {"lsetarray", setarray},
+    {"lgetarray", getarray},
+    {"lgetsize", getsize},
 
-    {"lnewarrayV2" , newarrayV2},
-    {"lsetarrayV2" , setarrayV2},
-    {"lgetarrayV2" , getarrayV2},
-    {"lgetsizeV2" , getsizeV2},
+    {"lnewarrayV2", newarrayV2},
+    {"lsetarrayV2", setarrayV2},
+    {"lgetarrayV2", getarrayV2},
+    {"lgetsizeV2", getsizeV2},
 
+    {"lnew", newarray},
     {"__tostring", array2string},
+    {"__index", setarray},
+    {"__newindex", getarray},
+    {"__len", getsize},
     {NULL, NULL}
 };
- 
-

@@ -227,18 +227,46 @@ int array2string (lua_State *L) {
     return 1;
 }
 
-int luaopen_array (lua_State *L) {
-    luaL_newmetatable(L, "LuaBook.array");
-    lua_pushstring(L, "__index");
-    lua_pushvalue(L, -2);
-    /* pushes the metatable */
-    lua_settable(L, -3); /* metatable.__index = metatable */
-    luaL_setfuncs(L, mylib, 0);
-    luaL_setfuncs(L, mylib, 0);
-    //luaL_openlib(L, NULL, mylib, 0);
-    //luaL_openlib(L, "array", mylib, 0);
+static const struct luaL_Reg arraylib_f[] = 
+{
+    {"lnew",newarray},
+    {NULL,NULL}
+};
+static const struct luaL_Reg arraylib_m[] =
+{
+    {"__index",setarray},
+    {"__newindex",getarray},
+    {"__len",getsize},
+    {NULL,NULL}
+};
+
+int luaopen_array(lua_State *L){
+    luaL_newmetatable(L,"LuaBook.array");
+    lua_pushvalue(L,-1);
+    lua_setfield(L,-2,"__index");
+    
+    lua_register(L,NULL,mylib);
+    lua_register(L,"array",mylib);
+    //lua_register(L,NULL,arraylib_m);
+    //lua_register(L,"array",arraylib_f);
+    //luaL_register(L,NULL,arraylib_m);
+    //luaL_register(L,"array",arraylib_f);
     return 1;
 }
+
+//int luaopen_array (lua_State *L) {
+//    luaL_newmetatable(L, "LuaBook.array");
+//    lua_pushstring(L, "__index");
+//    lua_pushvalue(L, -2); /* pushes the metatable */
+//    lua_settable(L, -3);  /* metatable.__index = metatable */
+//    //luaL_setfuncs(L, mylib, 0);
+//    //luaL_setfuncs(L, NULL, mylib, 0);
+//    //luaL_openlib(L, NULL, mylib, 0);
+//    //luaL_openlib(L, "array", mylib, 0);
+//    luaL_register(L,NULL,arraylib_m);
+//    luaL_register(L,"array",arraylib_f);
+//    return 1;
+//}
 
 //Function name can not be changed.
 int luaopen_lib(lua_State *L){ 
