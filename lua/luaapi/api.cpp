@@ -139,6 +139,6 @@ int main(void)
     //lualenTest();
     //loadConf();
     //loadTable();
-    //callfLuafTest();
-    luaapitest();
+    callfLuafTest();
+    //luaapitest();
 }
