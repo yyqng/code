@@ -121,6 +121,15 @@ double callfLuafTest () {
     return z;
 }
 
+void luaapitest() {
+    lua_State *L = luaL_newstate();
+    printf ("lua_version(NULL) = %f\n", *(double*)lua_version(NULL));
+    printf ("lua_version(L) = %f\n", *(double*)lua_version(L));
+    ((void)L);
+    luaL_checkversion(L);
+    lua_close(L);
+}
+
 int main(void)
 {
     //stackDumpTest();
@@ -130,5 +139,6 @@ int main(void)
     //lualenTest();
     //loadConf();
     //loadTable();
-    callfLuafTest();
+    //callfLuafTest();
+    luaapitest();
 }
