@@ -99,9 +99,9 @@ end
 --print(lib.lsin(3.14159265354))
 --print(mysin(3.14159265354))
 --print(lib.ldir("."))
---l_mapTest() 
+l_mapTest() 
 --print(lib.lsplit("hi,,there", ","))
 --lib.lregref()
 --l_ctableTest(2)
 --l_stdinTest()
-l_classTest()   ------wrong
+--l_classTest()   ------wrong
