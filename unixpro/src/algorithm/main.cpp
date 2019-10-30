@@ -5,7 +5,9 @@ int main(void)
     //hashtableTest();
     Solution s;
     //s.maxSubArrayTest();
-    s.searchMatrixTest();
+    //s.searchMatrixTest();
+    //s.minCostClimbingStairsTest();
+    s.lengthOfLISTest();
     return 0;
 }
 

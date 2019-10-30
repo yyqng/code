@@ -8,5 +8,9 @@ public:
     int maxSubArrayTest();
     bool searchMatrix(vector<vector<int>>& matrix, int target);
     bool searchMatrixTest();
+    int minCostClimbingStairs(vector<int>& cost);
+    void minCostClimbingStairsTest();
+    int lengthOfLIS(vector<int>& nums);
+    void lengthOfLISTest();
 
 };

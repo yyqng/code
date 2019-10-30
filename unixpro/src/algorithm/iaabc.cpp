@@ -178,3 +178,65 @@ bool Solution::searchMatrixTest()
     printf("searchMatrix(matrix, 0)  = %d\n", searchMatrix(matrix, 0));
     return true;
 }
+
+int Solution::minCostClimbingStairs(vector<int>& cost)
+{
+    int sum[3] = {cost[0], cost[1], 0};
+    for(int i = 2; i < cost.size(); ++i)
+    {
+        if(sum[1] < sum[0])
+            sum[2] = sum[1] + cost[i];
+        else
+            sum[2] = sum[0] + cost[i];
+        sum[0] = sum[1];
+        sum[1] = sum[2];
+    }
+    if(sum[0] < sum[1])
+        return sum[0];
+    else
+        return sum[1];
+}
+
+void Solution::minCostClimbingStairsTest()
+{
+    vector<int> cost = {0, 0, 0, 1};
+    //vector<int> cost = {0, 0, 0, 0};
+    //vector<int> cost = {10, 15, 20};
+    //vector<int> cost = {1, 100, 1, 1, 1, 100, 1, 1, 100, 1};
+    int ret = minCostClimbingStairs(cost);
+    printf("min cost is %d\n", ret);
+}
+
+int Solution::lengthOfLIS(vector<int>& nums)
+{
+    if(nums.size() == 0)
+        return 0;
+
+    int ret = 1;
+    vector<int> dp(nums.size(), 1);
+    for(int i = 1; i < nums.size(); ++i)
+    {
+        int j = i - 1;
+        for(; j >= 0; --j)
+        {
+            if(nums[j] < nums[i] && dp[i] < dp[j] + 1)
+                dp[i] = dp[j] + 1;
+        }
+    }
+
+    ret = dp[0];
+    for(int i = 1; i < dp.size(); ++i)
+    {
+        if(ret < dp[i])
+            ret = dp[i];
+    }
+    return ret;
+}
+
+void Solution::lengthOfLISTest()
+{
+    vector<int> nums = {10, 9, 2, 5, 3, 7, 101, 18};
+    //vector<int> nums = {1, 3, 6, 7, 9, 4, 10, 5, 6};
+    int ret = lengthOfLIS(nums);
+    printf("lengthOfLIS is %d\n", ret);
+}
