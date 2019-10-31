@@ -11,6 +11,7 @@ public:
     int minCostClimbingStairs(vector<int>& cost);
     void minCostClimbingStairsTest();
     int lengthOfLIS(vector<int>& nums);
+    int lengthOfLIS_better(vector<int>& nums);
     void lengthOfLISTest();
 
 };

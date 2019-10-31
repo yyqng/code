@@ -207,13 +207,28 @@ void Solution::minCostClimbingStairsTest()
     printf("min cost is %d\n", ret);
 }
 
+int Solution::lengthOfLIS_better(vector<int>& nums)
+{
+    if(nums.size() == 0)
+        return 0;
+    vector<int> results;
+    for(int i = 0; i < nums.size(); ++i)
+    {
+        vector<int>::iterator it = lower_bound(results.begin(), results.end(), nums[i]);
+        if(it == results.end())
+            results.push_back(nums[i]);
+        else
+            *it = nums[i];
+    }
+    return results.size();
+}
+
 int Solution::lengthOfLIS(vector<int>& nums)
 {
     if(nums.size() == 0)
         return 0;
-
-    int ret = 1;
     vector<int> dp(nums.size(), 1);
+    int ret = dp[0];
     for(int i = 1; i < nums.size(); ++i)
     {
         int j = i - 1;
@@ -222,11 +237,6 @@ int Solution::lengthOfLIS(vector<int>& nums)
             if(nums[j] < nums[i] && dp[i] < dp[j] + 1)
                 dp[i] = dp[j] + 1;
         }
-    }
-
-    ret = dp[0];
-    for(int i = 1; i < dp.size(); ++i)
-    {
         if(ret < dp[i])
             ret = dp[i];
     }
@@ -237,6 +247,8 @@ void Solution::lengthOfLISTest()
 {
     vector<int> nums = {10, 9, 2, 5, 3, 7, 101, 18};
     //vector<int> nums = {1, 3, 6, 7, 9, 4, 10, 5, 6};
+    //vector<int> nums = {2, 2};
     int ret = lengthOfLIS(nums);
+    ret = lengthOfLIS_better(nums);
     printf("lengthOfLIS is %d\n", ret);
 }
