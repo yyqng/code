@@ -27,7 +27,7 @@ int Solution::maxSubArrayTest()
     return 0;
 }
 
-bool bruceSearch(vector<vector<int>>& a, int target)
+bool bruceSearch(const vector<vector<int>>& a, int target)
 {
     for(int i = 0; i < a.size(); ++i) {
         for(int j = 0; j < a[i].size(); ++j) {
@@ -251,4 +251,132 @@ void Solution::lengthOfLISTest()
     int ret = lengthOfLIS(nums);
     ret = lengthOfLIS_better(nums);
     printf("lengthOfLIS is %d\n", ret);
+}
+
+vector<int>::iterator bruceSearch(vector<int>& a, int target)
+{
+    vector<int>::iterator it = a.begin();
+    for(; it != a.end(); ++it) {
+        if(*it == target) {
+            return it;
+        }
+    }
+    return it;
+}
+/*
+vector<int> Solution::findOrder(int numCourses, vector<vector<int>>& prerequisites)
+{
+    vector<int> results;
+    for(int i = 0; i < prerequisites.size(); ++i)
+    {
+        int p = prerequisites[i][0];
+        int q = prerequisites[i][1];
+        vector<int>::iterator itq = bruceSearch(results, q);
+        vector<int>::iterator itp = bruceSearch(results, p);
+        if(itq != results.end() && itp != results.end() && *itp < *itq) {
+            swap(*itp, *itq);
+        }
+        else if(itq == results.end()) {
+            if(itp == results.end()) {
+                results.push_back(q);
+                results.push_back(p);
+            }
+            else {
+                results.insert(itp, q);
+            }
+        }
+        else {
+            if(itp == results.end()) {
+                results.insert(itq + 1, p);
+            }
+            else if (itp < itq) {
+                results.clear();
+                return results;
+            }
+        }
+    }
+    for(int i = 0; i < numCourses; ++i)
+    {
+        vector<int>::iterator it = bruceSearch(results, i);
+        if(it == results.end()) {
+            results.push_back(i);
+        }
+    }
+    return results;
+}
+*/
+
+typedef struct sNode
+{
+    int nodeNum;  //Node number
+    int color;    //0: white 1: grey 2: black
+    sNode * next; //The node to whitch this node points.
+}Node;
+
+vector<int> Solution::findOrder(int numCourses, vector<vector<int>>& prerequisites)
+{
+    Node n;
+    n.color = 0;
+    n.next = NULL;
+    vector<Node> emptyNode;
+    vector<vector<Node>> graph;
+    vector<int> results;
+    for(int i = 0; i < prerequisites.size(); ++i)
+    {
+        int p = prerequisites[i][0];
+        int q = prerequisites[i][1];
+        vector<int>::iterator itq = bruceSearch(results, q);
+        vector<int>::iterator itp = bruceSearch(results, p);
+        if(itq != results.end() && itp != results.end() && *itp < *itq) {
+            swap(*itp, *itq);
+        }
+        else if(itq == results.end()) {
+            if(itp == results.end()) {
+                results.push_back(q);
+                results.push_back(p);
+            }
+            else {
+                results.insert(itp, q);
+            }
+        }
+        else {
+            if(itp == results.end()) {
+                results.insert(itq + 1, p);
+            }
+            else if (itp < itq) {
+                results.clear();
+                return results;
+            }
+        }
+    }
+    for(int i = 0; i < numCourses; ++i)
+    {
+        vector<int>::iterator it = bruceSearch(results, i);
+        if(it == results.end()) {
+            results.push_back(i);
+        }
+    }
+    return results;
+}
+
+void printVector(const vector<int>& a)
+{
+    vector<int>::const_iterator it = a.begin();
+    for(; it != a.end(); ++it) {
+        printf("%d ", *it);
+    }
+    printf("\n");
+}
+
+void Solution::findOrderTest()
+{
+    //vector<vector<int>> prerequisites = {{1, 0}, {2, 0}, {3, 1}, {3, 2}};
+    //vector<int> results = findOrder(4, prerequisites);
+    //vector<vector<int>> prerequisites = {{1, 0}, {0, 1}};
+    //vector<int> results = findOrder(2, prerequisites);
+    //vector<vector<int>> prerequisites = {{2, 0}, {2, 1}};
+    //vector<int> results = findOrder(3, prerequisites);
+    vector<vector<int>> prerequisites = {{0, 1}, {0, 2}, {1, 2}};
+    vector<int> results = findOrder(3, prerequisites);
+    printVector(results);
 }

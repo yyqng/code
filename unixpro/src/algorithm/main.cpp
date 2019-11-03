@@ -7,7 +7,8 @@ int main(void)
     //s.maxSubArrayTest();
     //s.searchMatrixTest();
     //s.minCostClimbingStairsTest();
-    s.lengthOfLISTest();
+    //s.lengthOfLISTest();
+    s.findOrderTest();
     return 0;
 }
 

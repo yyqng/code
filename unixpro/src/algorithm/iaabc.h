@@ -13,5 +13,7 @@ public:
     int lengthOfLIS(vector<int>& nums);
     int lengthOfLIS_better(vector<int>& nums);
     void lengthOfLISTest();
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites);
+    void findOrderTest();
 
 };
