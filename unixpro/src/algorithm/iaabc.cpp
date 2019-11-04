@@ -310,51 +310,49 @@ typedef struct sNode
 {
     int nodeNum;  //Node number
     int color;    //0: white 1: grey 2: black
-    sNode * next; //The node to whitch this node points.
+    int d;        //discovery time
+    int f;        //finish time
 }Node;
+
+void graphInit(int numNodes, vector<vector<int>>& prerequisites, vector<vector<Node>> &graph)
+{
+    Node node;
+    node.nodeNum = 0;
+    node.color = 0;
+    node.d = -1;
+    node.f = -1;
+    vector<Node> vNodes;
+    vNodes.push_back(node);
+    for(int i = 0; i < numNodes; ++i)
+    {
+        graph.push_back(vNodes);
+        graph[i][0].nodeNum = i;
+    }
+
+    for(int i = 0; i < prerequisites.size(); ++i)
+    {
+        int p = prerequisites[i][1];
+        int q = prerequisites[i][0];
+        node.nodeNum = q;
+        graph[p].push_back(node);
+    }
+}
+
+void dfsVisit(vector<vector<Node>> &graph, int u, int &time)
+{
+    
+
+}
 
 vector<int> Solution::findOrder(int numCourses, vector<vector<int>>& prerequisites)
 {
-    Node n;
-    n.color = 0;
-    n.next = NULL;
-    vector<Node> emptyNode;
-    vector<vector<Node>> graph;
     vector<int> results;
-    for(int i = 0; i < prerequisites.size(); ++i)
-    {
-        int p = prerequisites[i][0];
-        int q = prerequisites[i][1];
-        vector<int>::iterator itq = bruceSearch(results, q);
-        vector<int>::iterator itp = bruceSearch(results, p);
-        if(itq != results.end() && itp != results.end() && *itp < *itq) {
-            swap(*itp, *itq);
-        }
-        else if(itq == results.end()) {
-            if(itp == results.end()) {
-                results.push_back(q);
-                results.push_back(p);
-            }
-            else {
-                results.insert(itp, q);
-            }
-        }
-        else {
-            if(itp == results.end()) {
-                results.insert(itq + 1, p);
-            }
-            else if (itp < itq) {
-                results.clear();
-                return results;
-            }
-        }
-    }
+    vector<vector<Node>> graph;
+    graphInit(numCourses, prerequisites, graph);
+    int time = 0;
     for(int i = 0; i < numCourses; ++i)
     {
-        vector<int>::iterator it = bruceSearch(results, i);
-        if(it == results.end()) {
-            results.push_back(i);
-        }
+        dfsVisit(graph, i, time);
     }
     return results;
 }
