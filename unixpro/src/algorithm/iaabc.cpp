@@ -314,45 +314,57 @@ typedef struct sNode
     int f;        //finish time
 }Node;
 
-void graphInit(int numNodes, vector<vector<int>>& prerequisites, vector<vector<Node>> &graph)
+//g: graph
+void graphInit(int numNodes, vector<vector<int>>& prerequisites, vector<vector<int>> &g)
 {
-    Node node;
-    node.nodeNum = 0;
-    node.color = 0;
-    node.d = -1;
-    node.f = -1;
-    vector<Node> vNodes;
-    vNodes.push_back(node);
-    for(int i = 0; i < numNodes; ++i)
-    {
-        graph.push_back(vNodes);
-        graph[i][0].nodeNum = i;
-    }
-
+    vector<int> e;  //edges
+    g.assign(numNodes, e);
     for(int i = 0; i < prerequisites.size(); ++i)
     {
         int p = prerequisites[i][1];
         int q = prerequisites[i][0];
-        node.nodeNum = q;
-        graph[p].push_back(node);
+        g[p].push_back(q);
     }
 }
 
-void dfsVisit(vector<vector<Node>> &graph, int u, int &time)
+//g: graph 
+//v: visit 0: not visited  1: visiting   2: finish visiting
+//r: results
+//i: results[i] need to be filled   i decrease from results.size() - 1 to 0
+bool dfsVisit(vector<vector<int>> &g, int u, vector<int> &v, vector<int> &r, int &i)
 {
-    
-
+    if(v[u] == 0)
+    {
+        v[u] = 1;
+        for(int k = 0; k < g[u].size(); ++k)
+        {
+            int n = g[u][k]; //kth next node of node u
+            if(v[n] == 0 && !dfsVisit(g, n, v, r, i)) {
+                return false; //circle
+            } else if(v[n] == 1) {
+                return false; //circle
+            }
+        }
+        v[u] = 2;
+        r[i] = u;
+    }
+    return true;
 }
 
 vector<int> Solution::findOrder(int numCourses, vector<vector<int>>& prerequisites)
 {
-    vector<int> results;
-    vector<vector<Node>> graph;
+    vector<int> results(numCourses, -1);
+    int index = results.size() - 1;
+    vector<vector<int>> graph;
     graphInit(numCourses, prerequisites, graph);
-    int time = 0;
+    vector<int> visit(numCourses, 0);
     for(int i = 0; i < numCourses; ++i)
     {
-        dfsVisit(graph, i, time);
+        bool ret = dfsVisit(graph, i, visit, results, index);
+        if(ret == false) {
+            results.clear();
+            return results; //circle
+        }
     }
     return results;
 }
@@ -370,11 +382,13 @@ void Solution::findOrderTest()
 {
     //vector<vector<int>> prerequisites = {{1, 0}, {2, 0}, {3, 1}, {3, 2}};
     //vector<int> results = findOrder(4, prerequisites);
-    //vector<vector<int>> prerequisites = {{1, 0}, {0, 1}};
-    //vector<int> results = findOrder(2, prerequisites);
+    vector<vector<int>> prerequisites = {{1, 0}, {0, 1}};
+    vector<int> results = findOrder(2, prerequisites);
     //vector<vector<int>> prerequisites = {{2, 0}, {2, 1}};
     //vector<int> results = findOrder(3, prerequisites);
-    vector<vector<int>> prerequisites = {{0, 1}, {0, 2}, {1, 2}};
-    vector<int> results = findOrder(3, prerequisites);
+    //vector<vector<int>> prerequisites = {{0, 1}, {0, 2}, {1, 2}};
+    //vector<int> results = findOrder(3, prerequisites);
+    //vector<vector<int>> prerequisites = {{0, 1}};
+    //vector<int> results = findOrder(2, prerequisites);
     printVector(results);
 }
