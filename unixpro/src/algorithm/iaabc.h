@@ -1,6 +1,7 @@
 #include<stdlib.h>
 #include<iostream>
 #include<vector>
+#include <stack>
 using namespace std;
 class Solution {
 public:
@@ -13,5 +14,7 @@ public:
     int lengthOfLIS(vector<int>& nums);
     int lengthOfLIS_better(vector<int>& nums);
     void lengthOfLISTest();
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites);
+    void findOrderTest();
 
 };
