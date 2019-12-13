@@ -214,7 +214,7 @@ int Solution::lengthOfLIS_better(vector<int>& nums)
     vector<int> results;
     for(int i = 0; i < nums.size(); ++i)
     {
-        vector<int>::iterator it = lower_bound(results.begin(), results.end(), nums[i]);
+        vector<int>::iterator it ;//= lower_bound(results.begin(), results.end(), nums[i]);
         if(it == results.end())
             results.push_back(nums[i]);
         else
