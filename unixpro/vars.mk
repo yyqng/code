@@ -13,14 +13,14 @@ LIBS =
 DEFS =
 
 # C++标准
-#CXX_STD = -std=c++0x
-CXX_STD = -std=c++11
+CXX_STD = -std=c++0x
+#CXX_STD = -std=c++11
 
 # C文件编译选项
-CFLAGS = -Wall -Werror
+CFLAGS = -Wall -Werror -quiet
 
 # C++文件编译选项
-CXXFLAGS = -Wall #-Werror
+CXXFLAGS = -Wall -quiet#-Werror
 
 # 链接选项
 LNKFLAGS = 

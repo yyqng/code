@@ -1,25 +1,19 @@
-#include <math.h>
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-#include <string.h>
-#include <dirent.h>
-#include <errno.h>
+#include "lib.h"
  
-static int sum(lua_State *L){
+int sum(lua_State *L){
     double d1 = luaL_checknumber(L, 1);
     double d2 = luaL_checknumber(L, 2);
     lua_pushnumber(L, d1+d2);
     return 1;
 }
 
-static int mysin (lua_State *L) {
+int mysin (lua_State *L) {
     double d = lua_tonumber(L, 1); /* get argument */
     lua_pushnumber(L, sin(d)); /* push result */
     return 1; /* number of results */
 }
 
-static int dir (lua_State *L) {
+int dir (lua_State *L) {
     DIR *dir;
     struct dirent *entry;
     int i;
@@ -68,7 +62,7 @@ int map (lua_State *L) {
     return 0; /* no results */
 }
 
-static int split (lua_State *L) {
+int split (lua_State *L) {
     const char *s = luaL_checkstring(L, 1);
     const char *sep = luaL_checkstring(L, 2);
     const char *e;
@@ -151,12 +145,7 @@ int regref(lua_State *L)
     return 1; /* return the table */
 }
 
-typedef struct NumArray {
-    int size;
-    double values[1]; /* variable part */
-} NumArray;
-
-static int newarray (lua_State *L) {
+int newarray (lua_State *L) {
     int n = luaL_checkint(L, 1);
     size_t nbytes = sizeof(NumArray) + (n - 1)*sizeof(double);
     NumArray *a = (NumArray *)lua_newuserdata(L, nbytes);
@@ -164,7 +153,7 @@ static int newarray (lua_State *L) {
     return 1; /* new userdatum is already on the stack */
 }
 
-static int setarray (lua_State *L) {
+int setarray (lua_State *L) {
     NumArray *a = (NumArray *)lua_touserdata(L, 1);
     int index = luaL_checkint(L, 2);
     double value = luaL_checknumber(L, 3);
@@ -175,7 +164,7 @@ static int setarray (lua_State *L) {
     return 0;
 }
 
-static int getarray (lua_State *L) {
+int getarray (lua_State *L) {
     NumArray *a = (NumArray *)lua_touserdata(L, 1);
     int index = luaL_checkint(L, 2);
     luaL_argcheck(L, a != NULL, 1, "'array' expected");
@@ -184,21 +173,14 @@ static int getarray (lua_State *L) {
     return 1;
 }
 
-static int getsize (lua_State *L) {
+int getsize (lua_State *L) {
     NumArray *a = (NumArray *)lua_touserdata(L, 1);
     luaL_argcheck(L, a != NULL, 1, "`array' expected");
     lua_pushnumber(L, a->size);
     return 1;
 }
 
-int luaopen_array (lua_State *L) {
-    luaL_newmetatable(L, "luaBook.array");
-    //luaL_openlibs(L, "array", arraylib, 0);
-    luaL_openlibs(L);
-    return 1;
-}
-
-static int newarrayV2 (lua_State *L) {
+int newarrayV2 (lua_State *L) {
     int n = luaL_checkint(L, 1);
     size_t nbytes = sizeof(NumArray) + (n - 1)*sizeof(double);
     NumArray *a = (NumArray *)lua_newuserdata(L, nbytes);
@@ -215,7 +197,7 @@ static NumArray *checkarray (lua_State *L) {
     return (NumArray *)ud;
 }
 
-static int getsizeV2 (lua_State *L) {
+int getsizeV2 (lua_State *L) {
    NumArray *a = checkarray(L);
    lua_pushnumber(L, a->size);
    return 1;
@@ -228,39 +210,64 @@ static double *getelem (lua_State *L) {
     return &a->values[index - 1];    // return element address.
 }
 
-static int setarrayV2 (lua_State *L) {
+int setarrayV2 (lua_State *L) {
     double newvalue = luaL_checknumber(L, 3);
     *getelem(L) = newvalue;
     return 0;
 }
 
-static int getarrayV2 (lua_State *L) {
+int getarrayV2 (lua_State *L) {
     lua_pushnumber(L, *getelem(L));
     return 1;
 }
 
-//Name of array mylib can be changed.
-static const struct luaL_Reg mylib[] = {
-    {"lsum" , sum},
-    {"lsin" , mysin},
-    {"ldir" , dir},
-    {"lmap" , map},
-    {"lsplit" , split},
-    {"lregref" ,  regref},
+int array2string (lua_State *L) {
+    NumArray *a = checkarray(L);
+    lua_pushfstring(L, "array(%d)", a->size);
+    return 1;
+}
 
-    {"lnewarray" , newarray},
-    {"lsetarray" , setarray},
-    {"lgetarray" , getarray},
-    {"lgetsize" , getsize},
-
-    {"lnewarrayV2" , newarrayV2},
-    {"lsetarrayV2" , setarrayV2},
-    {"lgetarrayV2" , getarrayV2},
-    {"lgetsizeV2" , getsizeV2},
-
-    {NULL, NULL}
+static const struct luaL_Reg arraylib_f[] = 
+{
+    {"lnew",newarray},
+    {NULL,NULL}
 };
- 
+static const struct luaL_Reg arraylib_m[] =
+{
+    {"__index",setarray},
+    {"__newindex",getarray},
+    {"__len",getsize},
+    {NULL,NULL}
+};
+
+int luaopen_array(lua_State *L){
+    luaL_newmetatable(L,"LuaBook.array");
+    lua_pushvalue(L,-1);
+    lua_setfield(L,-2,"__index");
+    
+    lua_register(L,NULL,mylib);
+    lua_register(L,"array",mylib);
+    //lua_register(L,NULL,arraylib_m);
+    //lua_register(L,"array",arraylib_f);
+    //luaL_register(L,NULL,arraylib_m);
+    //luaL_register(L,"array",arraylib_f);
+    return 1;
+}
+
+//int luaopen_array (lua_State *L) {
+//    luaL_newmetatable(L, "LuaBook.array");
+//    lua_pushstring(L, "__index");
+//    lua_pushvalue(L, -2); /* pushes the metatable */
+//    lua_settable(L, -3);  /* metatable.__index = metatable */
+//    //luaL_setfuncs(L, mylib, 0);
+//    //luaL_setfuncs(L, NULL, mylib, 0);
+//    //luaL_openlib(L, NULL, mylib, 0);
+//    //luaL_openlib(L, "array", mylib, 0);
+//    luaL_register(L,NULL,arraylib_m);
+//    luaL_register(L,"array",arraylib_f);
+//    return 1;
+//}
+
 //Function name can not be changed.
 int luaopen_lib(lua_State *L){ 
     luaL_newlib(L, mylib); // 5.2

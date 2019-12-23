@@ -3,7 +3,7 @@ file = io.open("/nfs/DEV/OPC/feibin/test.log", "r")
 io.input(file)
 
 local words = {}
-function printtable(t)
+local function printtable(t)
     if (t == nil) then
         return
     end
@@ -12,7 +12,7 @@ function printtable(t)
     end
 end
 
-function useSpace2split(s, p)
+local function useSpace2split(s, p)
     if (s == nil) then
         return
     end
@@ -22,7 +22,7 @@ function useSpace2split(s, p)
     end)
 end
 
-function replacePunctuationWithSpace(s)
+local function replacePunctuationWithSpace(s)
     if (s == nil) then
         return
     end
@@ -31,7 +31,7 @@ function replacePunctuationWithSpace(s)
     useSpace2split(s, p)
 end
 
-function getWords()
+local function getWords()
     while(true)
     do
         local s = io.read()
@@ -44,6 +44,8 @@ end
 
 getWords()
 printtable(words)
+print(collectgarbage("count"))
 words = nil;
-collectgarbage()
+collectgarbage("collect")
+print(collectgarbage("count"))
 io.close(file)

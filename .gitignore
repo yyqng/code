@@ -8,3 +8,4 @@
 *.so
 *.out
 *tags
+unixpro/bin/*
