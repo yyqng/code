@@ -3,6 +3,13 @@
 #include <stdlib.h>  
 #include <math.h>  
 #include "gsl_cdf.h"
+//c99 -xc - -lm -g -Wall -include stdio.h -O3 << '---' 
+//int main(){printf("Hello from the command line.\n");} 
+//---
+//./a.out
+
+//cat txt |c99 -xc - -lm -g -Wall -include stdio.h -O3
+//./a.out
 
 double erf_test()
 {
