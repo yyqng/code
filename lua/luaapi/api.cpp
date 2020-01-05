@@ -130,6 +130,16 @@ void luaapitest() {
     lua_close(L);
 }
 
+void definetest()
+{
+#define LUA_TNIL		0
+    printf ("LUA_TNIL = %d\n", LUA_TNIL);
+//#define NILCONSTANT	{NULL}, LUA_TNIL
+//#define NILCONSTANT	NULL
+//    printf ("NILCONSTANT = %s\n", NILCONSTANT);
+
+}
+
 int main(void)
 {
     //stackDumpTest();
@@ -139,6 +149,7 @@ int main(void)
     //lualenTest();
     //loadConf();
     //loadTable();
-    callfLuafTest();
+    //callfLuafTest();
     //luaapitest();
+    definetest();
 }
