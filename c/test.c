@@ -2,6 +2,7 @@
 #include <stdint.h>  
 #include <stdlib.h>  
 #include <math.h>  
+#include "gsl_cdf.h"
 
 double erf_test()
 {
