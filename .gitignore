@@ -9,3 +9,4 @@
 *.out
 *tags
 unixpro/bin/*
+c/test

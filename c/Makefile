@@ -1,8 +1,6 @@
-#gcc erf.c -o erf -lm -g -Wall -O3 -std=gnu11
-P=main.out
+P=test
 OBJECTS=test.o
-#CFLAGS = -g -Wall -O3
-CFLAGS= -g -Wall -std=gnu11 `pkg-config --cflags gsl`
+CFLAGS= -g -Wall -std=gnu11 `pkg-config --cflags gsl` -O0
 LDLIBS=`pkg-config --libs gsl`
 #LDLIBS=-lgsl -lgslcblas -lm
 CC=cc
