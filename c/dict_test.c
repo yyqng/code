@@ -1,5 +1,5 @@
 #include <glib.h>
-//#include "dict.h"
+#include "dict.h"
 typedef struct {                                         //❶
     dictionary *dd;
 } dfixture;
