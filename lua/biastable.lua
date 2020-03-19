@@ -144,7 +144,7 @@ local rule_bias_table2 = {
 
 }
 
-rule_bias_table_all = {
+rule_bias_table_a = {
     endSpMeasureExtension = 5,
     inSpMeasureExtension = 5,
     inSpMeasureExtensionV = -5,
@@ -208,23 +208,55 @@ rule_bias_table_all = {
     ruleQueryOption = 3,
 }
 
-local function rule_bias_tablei_check(rule_bias_tablei)
-    for k, v in pairs(rule_bias_tablei) do
-        if(type(v) ~= "table") then
-            error("rule_bias_tablei must be a table")
-        end
-        update_rule_bias_table(rule_table, v)
-        new_flow(rule_table.endSpMeasureExtension)
-    end
-end
+rule_bias_table_all = {
+    endSpMeasureExtension = 5,
+    inSpMeasureExtension = 5,
+    inSpMeasureExtensionV = -5,
+    inSpMeasureRange = -60,
+    inWdMeasureExtension = -5,
+    inWdMeasureExtensionV = 5,
+    inWdMeasureRange = -60,
+    outSpMeasureExtension = -5,
+    outSpMeasureExtensionV = 5,
+    outSpMeasureRange = -60,
+    outWdMeasureExtension = 5,
+    outWdMeasureExtensionV = -5,
+    outWdMeasureRange = -60,
+    runSpMeasureExtension = -5,
+    runWdMeasureExtension = 5,
+    spendWdMeasureExtension = 5,
+    
+    doLengthInterpolation = 1,
+    doSpaceInterpolation= 0,
+    endSizeTable = {},
+    endDistanceTable = {},
+    endBiasTable = {},
+        
+    widthTable = {},
+    spaceTable = {},
+    lengthTable = {},
+    biasTable = {},
+    endRetargetOption = 2,
+    ruleSmallSegment = 30,
 
-local function rule_bias_table_check(rule_bias_table)
-    for k, v in pairs(rule_bias_table) do
-        if(type(v) ~= "table") then
-            error("must be a table")
-        end
-    end
-end
+    endSpaceTable = {},
+    spendBiasTable = {},
+    spendDistanceTable = {},
+    spendRetargetOption = 2,
+    spendSizeTable = {},
+    spendWidthTable = {},
+    freezeSegments = {},
+    endSideSpaceTable = {},
+    endWidthTable = {},
+    spendSdieWidthTable = {},
+    spendSpaceTable = {},
+    endBiasWeightingOption = 2,
+    spendBiasWeightingOption = 2,
+    endSideSpaceWeight = 0.2,
+    spendSideWidthWeight = 0.2,
+    ruleQueryOption = 3,
+ 
+}
 
 local function printtable(table)
     print("")
@@ -258,64 +290,14 @@ local function mydeepcopy(object)   -- replaced by drcplusfunc.lua
     return _copy(object)
 end
 
-
-local function backup_rule_bias_table(RULE_TABLE, backup_table)
-    for k, v in pairs(RULE_TABLE) do
-        if(type(v) ~= "table") then
-            backup_table[k] = v
-            backup_table[k] = 11111
-        else
-            backup_table[k] = mydeepcopy(v)
-        end
-    end
-
-    printtable(RULE_TABLE)
-    printtable(RULE_TABLE.DEFAULT.widthTable)
-    backup_table.DEFAULT.widthTable[1] = 1000
-    backup_table.DEFAULT.widthTable[2] = 2000
-    backup_table.DEFAULT.widthTable[3] = 3000
-    printtable(backup_table)
-    printtable(backup_table.DEFAULT.widthTable)
-end
-
 local function update_rule_bias_table(RULE_TABLE, rule_bias_tablei)
-        --print(" RULE_TABLE.DEFAULT.biasTable[7] = ".. RULE_TABLE.DEFAULT.biasTable[7])
-        --print(" rule_bias_tablei.biasTable[7] = "..rule_bias_tablei.biasTable[7])
         RULE_TABLE.DEFAULT.biasTable[7] = rule_bias_tablei.biasTable[7]
-        --print(" RULE_TABLE.DEFAULT.biasTable[7] = ".. RULE_TABLE.DEFAULT.biasTable[7])
-        --print(" rule_bias_tablei.biasTable[7] = "..rule_bias_tablei.biasTable[7])
---    for k, v in pairs(rule_bias_tablei) do
---        repeat
---            if(type(v) == "table") then
---               break 
---            end
---            if(rule_bias_table_all[k] == nil) then
---            --    print("--------"..k.." is not exsit ")
---            end
---            RULE_TABLE[k] = v
-----            print(k.." "..v)
---        until true
---    end
-end
-
-local function multi_rule_bias_param_check()
-    print("multi_rule_bias_param_check")
-end
-
-local function new_flow(value)
-    print("new flow: value = "..value)
-end
-
-local function old_flow()
-    print("old flow")
 end
 
 local DT = {}
-local function myexecute_function(a, b, c, d, e)
-    print("myexecute_function "..a)
+DT.execute_function = function (a)
+    print(a)
 end
-
-DT.execute_function = myexecute_function
 
 local function check_table()
     print("check_table")
@@ -327,6 +309,27 @@ local function check_rule_bias_table(rule_bias_table)
             error("must be a table")
         end
     end
+
+    local nEndSize = -1
+    local nEndSpace = -1
+    local nEndBias = -1
+    local nEndDistance = -1
+
+    local nWidth = -1
+    local nSpace = -1
+    local nLength = -1
+    local nBias = -1
+
+    local nSpendBias = -1
+    local nSpendDistance = -1
+    local nSpendSize = -1
+    local nSpendWidth = -1
+    local nfreezeSegments = -1
+
+    local nEndSideSpace = -1
+    local nEndWidth = -1
+    local nSpendSdieWidth = -1
+    local nSpendSpace = -1
 
     for k, v in pairs(rule_bias_table) do
         print("check each table ============")
@@ -348,44 +351,51 @@ local function multiRuleBias(tt)
     local backup_table = mydeepcopy(topTable.RULE_TABLE)
     --printtable(topTable.RULE_TABLE)
     --printtable(backup_table)
-    DT.execute_function("AppMainRuleRedissection", "DT[tableName].tt.lib", 1, "DT[tableName].tt.param_table_name", "{key=DT[tableName].tt.key}")
+    DT.execute_function("AppMainRuleRedissection")
     for k, v in pairs(tt.rule_bias_table) do
         if(type(v) ~= "table") then
             error("must be a table")
         end
         update_rule_bias_table(topTable.RULE_TABLE, v)
-        DT.execute_function("ruleAppReinit", "DT[tableName].tt.lib", 1, "DT[tableName].tt.param_table_name", "{key=DT[tableName].tt.key}")
-        DT.execute_function("ruleAppMain", "DT[tableName].tt.lib", 1, "DT[tableName].tt.param_table_name", "{key=DT[tableName].tt.key}")
+        DT.execute_function("ruleAppReinit")
+        DT.execute_function("AppMainRuleBias")
     end
     topTable.RULE_TABLE = mydeepcopy(backup_table)
 end
 
-local function myrule(tt)
+DT.rule = function (tt)
     local topTable = _G[tt.param_table_name]
     --if(table.getn(tt.rule_bias_table) > 0) then
     if(tt.rule_bias_table ~= nil) then
         multiRuleBias(tt)
     else
-        DT.execute_function("ruleAppMain", "DT[tableName].tt.lib", 1, "DT[tableName].tt.param_table_name", "{key=DT[tableName].tt.key}")
+        DT.execute_function("ruleAppMain")
     end
 end
 
 
-TOP={      
-  runRetarget=2,   
-  RULE_TABLE=rule_table,
-}
-
-tt = {
-    test1 = 0,
-    rule_bias_table = {rule_bias_table1, rule_bias_table2},
-    param_table_name="TOP",
-    key=1,
-    debug_output=out_debug,
-    MASK1={
-        MAIN = graphics, --target,
-        debug_type = debugOut,
+local function AppInit()
+    TOP={      
+      runRetarget=2,   
+      RULE_TABLE=rule_table,
     }
-}
-DT.rule = myrule
-DT.rule(tt)
+    
+    tt = {
+        test1 = 0,
+        rule_bias_table = {rule_bias_table1, rule_bias_table2},
+        param_table_name="TOP",
+        key=1,
+        debug_output=out_debug,
+        MASK1={
+            MAIN = graphics, --target,
+            debug_type = debugOut,
+        }
+    }
+end
+
+local function AppMain()
+    DT.rule(tt)
+end
+
+AppInit()
+AppMain()
