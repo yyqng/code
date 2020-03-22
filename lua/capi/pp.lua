@@ -9,8 +9,8 @@
 --    width = 200; height = 200
 --end
 
-hellolua = "Hello lua from pp.lua"
-print(hellolua)
+hello= "Hello from pp.lua"
+print(hello)
 
 BLUE = {r=0.1, g=0.1, b=1}
 RED = {r=1, g=0.1, b=0}

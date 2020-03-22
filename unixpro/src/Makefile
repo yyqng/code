@@ -2,7 +2,7 @@ ifndef V
 	MAKEFLAGS += -s
 endif
 
-SUB_DIRS = algorithm  mycomm  curl  data signal  string  time  unix cpp libc proccess
+SUB_DIRS = algorithm  #mycomm  curl  data signal  string  time  unix cpp proccess #libc 
 
 all: debug
 
@@ -11,16 +11,16 @@ $(SUB_DIRS):
 	@$(MAKE) -C $@ $(MAKECMDGOALS) V=$V
 
 algorithm: mycomm
-curl: mycomm
-data: mycomm
-signal: mycomm
-string: mycomm
-time: mycomm
-unix: mycomm
-cpp: mycomm
-libc: mycomm
-dyad: mycomm
-proccess: mycomm
+#curl: mycomm
+#data: mycomm
+#signal: mycomm
+#string: mycomm
+#time: mycomm
+#unix: mycomm
+#cpp: mycomm
+##libc: mycomm
+#dyad: mycomm
+#proccess: mycomm
 #fileio: mycomm
 #spider: mycomm
 

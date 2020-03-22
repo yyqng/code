@@ -121,6 +121,29 @@ double callfLuafTest () {
     return z;
 }
 
+double callfLuafTest2() {
+    char filename[] = "pp.lua";
+    lua_State *L = luaL_newstate();
+    stackDump(L);
+    luaopen_base(L);
+    //luaopen_io(L);
+    //luaopen_string(L);
+    //luaopen_math(L);
+    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0))
+        error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
+
+    stackDump(L);
+    double x = 3.0;
+    double y = 2.0;
+    double z =  callLuaf(L, x, y);
+    lua_close(L);
+    printf ("In %s, Luaf(%f, %f) = %f\n", filename, x, y, z);
+    //double zV2 = 0;
+    //callLuafV2(L, "Luaf", "dd>d", x, y, &zV2);//call Luaf(L, x, y);
+    //printf ("In %s, Luaf(%f, %f) = %f\n", filename, x, y, zV2);
+    return z;
+}
+
 void luaapitest() {
     lua_State *L = luaL_newstate();
     printf ("lua_version(NULL) = %f\n", *(double*)lua_version(NULL));
@@ -149,7 +172,8 @@ int main(void)
     //lualenTest();
     //loadConf();
     //loadTable();
+    callfLuafTest2();
     //callfLuafTest();
     //luaapitest();
-    definetest();
+    //definetest();
 }

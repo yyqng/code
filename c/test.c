@@ -85,7 +85,7 @@ void print_env2()
 int main()
 {
 //    assert(0);
-    exit(3);
+    //exit(3);
     abort();
     int *p = (int*)malloc(sizeof(int));
     free(p);

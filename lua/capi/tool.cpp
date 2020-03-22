@@ -3,6 +3,7 @@
 void stackDump(lua_State *L){
     int i;
     int top = lua_gettop(L);      //Return the number of elements.
+    printf("Number of element: %d\n", top);
     for(i = 1; i <= top; i++){
         int t = lua_type(L, i);
         switch(t){

@@ -17,10 +17,10 @@ CXX_STD = -std=c++0x
 #CXX_STD = -std=c++11
 
 # C文件编译选项
-CFLAGS = -Wall -Werror -quiet
+CFLAGS = -Wall -Werror #-quiet
 
 # C++文件编译选项
-CXXFLAGS = -Wall -quiet#-Werror
+CXXFLAGS = -Wall #-quiet#-Werror
 
 # 链接选项
 LNKFLAGS = 
