@@ -1,0 +1,13 @@
+
+The current limit of number of files
+    cat /proc/sys/fs/inotify/max_user_watches
+/etc/sysctl.conf and add
+    fs.inotify.max_user_watches=524288
+Load new value 
+    sudo sysctl -p.
+setting
+"files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true
+  }
