@@ -220,6 +220,16 @@ local function printtable(table)
     print("")
 end
 
+local function printkey(table)
+    print("")
+    print("printkey <<<<<<<<<<<<< ")
+    for k in pairs(table) do
+        print("key = " .. k)
+    end
+    print("printkey >>>>>>>>>>>>")
+    print("")
+end
+
 
 --make a copy of a table (object). function will return a copied table
 local function mydeepcopy(object)   -- replaced by drcplusfunc.lua
@@ -379,5 +389,33 @@ local function AppMain()
     DT.rule(tt)
 end
 
-AppInit()
-AppMain()
+--AppInit()
+--AppMain()
+
+local function getkeys(mytable, keys)
+    for k in pairs(mytable) do
+        print("k = " .. k)
+        print("type(k) = " .. type(k))
+        table.insert(keys, k)
+    end
+end
+
+tt = {
+    lib = lib,
+    param_table_name = "TOP",
+    key = 23,
+    debug_output = out_gds,
+    MASK1 = {
+        MAIN = main1,
+        debug_type = {}
+    },
+    MASK2 = {
+        MAIN = main2,
+        debug_type = {}
+    },
+}
+
+local keys = {}
+mytable = {key1 = "v1", key2 = "v2", subtable1 = {1, 2, 3}}
+getkeys(mytable, keys)
+printtable(keys)
