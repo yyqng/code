@@ -208,56 +208,6 @@ rule_bias_table_a = {
     ruleQueryOption = 3,
 }
 
-rule_bias_table_all = {
-    endSpMeasureExtension = 5,
-    inSpMeasureExtension = 5,
-    inSpMeasureExtensionV = -5,
-    inSpMeasureRange = -60,
-    inWdMeasureExtension = -5,
-    inWdMeasureExtensionV = 5,
-    inWdMeasureRange = -60,
-    outSpMeasureExtension = -5,
-    outSpMeasureExtensionV = 5,
-    outSpMeasureRange = -60,
-    outWdMeasureExtension = 5,
-    outWdMeasureExtensionV = -5,
-    outWdMeasureRange = -60,
-    runSpMeasureExtension = -5,
-    runWdMeasureExtension = 5,
-    spendWdMeasureExtension = 5,
-    
-    doLengthInterpolation = 1,
-    doSpaceInterpolation= 0,
-    endSizeTable = {},
-    endDistanceTable = {},
-    endBiasTable = {},
-        
-    widthTable = {},
-    spaceTable = {},
-    lengthTable = {},
-    biasTable = {},
-    endRetargetOption = 2,
-    ruleSmallSegment = 30,
-
-    endSpaceTable = {},
-    spendBiasTable = {},
-    spendDistanceTable = {},
-    spendRetargetOption = 2,
-    spendSizeTable = {},
-    spendWidthTable = {},
-    freezeSegments = {},
-    endSideSpaceTable = {},
-    endWidthTable = {},
-    spendSdieWidthTable = {},
-    spendSpaceTable = {},
-    endBiasWeightingOption = 2,
-    spendBiasWeightingOption = 2,
-    endSideSpaceWeight = 0.2,
-    spendSideWidthWeight = 0.2,
-    ruleQueryOption = 3,
- 
-}
-
 local function printtable(table)
     print("")
     print("printtable <<<<<<<<<<<<< ")
@@ -291,7 +241,15 @@ local function mydeepcopy(object)   -- replaced by drcplusfunc.lua
 end
 
 local function update_rule_bias_table(RULE_TABLE, rule_bias_tablei)
-        RULE_TABLE.DEFAULT.biasTable[7] = rule_bias_tablei.biasTable[7]
+    for k, v in pairs(rule_bias_tablei) do
+        if(type(v) ~= "table") then
+            print("update " .. k)
+            RULE_TABLE[k] = v
+        else
+            print("update table    " .. k)
+            RULE_TABLE[k] = mydeepcopy(v)
+        end
+    end
 end
 
 local DT = {}
@@ -303,49 +261,72 @@ local function check_table()
     print("check_table")
 end
 
-local function check_rule_bias_table(rule_bias_table)
-    for k, v in pairs(rule_bias_table) do
-        if(type(v) ~= "table") then
-            error("must be a table")
-        end
-    end
+local function check_rule_bias_tablei(rule_bias_tablei)
+    local rule_bias_table_all = {
+        endSpMeasureExtension = 5,
+        inSpMeasureExtension = 5,
+        inSpMeasureExtensionV = -5,
+        inSpMeasureRange = -60,
+        inWdMeasureExtension = -5,
+        inWdMeasureExtensionV = 5,
+        inWdMeasureRange = -60,
+        outSpMeasureExtension = -5,
+        outSpMeasureExtensionV = 5,
+        outSpMeasureRange = -60,
+        outWdMeasureExtension = 5,
+        outWdMeasureExtensionV = -5,
+        outWdMeasureRange = -60,
+        runSpMeasureExtension = -5,
+        runWdMeasureExtension = 5,
+        spendWdMeasureExtension = 5,
+        
+        doLengthInterpolation = 1,
+        doSpaceInterpolation= 0,
+        endSizeTable = {},
+        endDistanceTable = {},
+        endBiasTable = {},
+        endSpaceTable = {},
+        endSideSpaceTable = {},
+        endWidthTable = {},
+            
+        widthTable = {},
+        spaceTable = {},
+        lengthTable = {},
+        biasTable = {},
+        endRetargetOption = 2,
+        ruleSmallSegment = 30,
+    
+        spendBiasTable = {},
+        spendDistanceTable = {},
+        spendSizeTable = {},
+        spendWidthTable = {},
+        spendSdieWidthTable = {},
+        spendSpaceTable = {},
+    
+        freezeSegments = {},
+        spendRetargetOption = 2,
+        endBiasWeightingOption = 2,
+        spendBiasWeightingOption = 2,
+        endSideSpaceWeight = 0.2,
+        spendSideWidthWeight = 0.2,
+        ruleQueryOption = 3,
+    }
 
-    local nEndSize = -1
-    local nEndSpace = -1
-    local nEndBias = -1
-    local nEndDistance = -1
-
-    local nWidth = -1
-    local nSpace = -1
-    local nLength = -1
-    local nBias = -1
-
-    local nSpendBias = -1
-    local nSpendDistance = -1
-    local nSpendSize = -1
-    local nSpendWidth = -1
-    local nfreezeSegments = -1
-
-    local nEndSideSpace = -1
-    local nEndWidth = -1
-    local nSpendSdieWidth = -1
-    local nSpendSpace = -1
-
-    for k, v in pairs(rule_bias_table) do
-        print("check each table ============")
-        for k2, v2 in pairs(v) do
-            if(rule_bias_table_all[k2] == nil) then
-                error(k2 .. " is illegal parameter.")
-            end
-            if(type(v2) == "table") then
-                check_table()
-            end
+    print("check each table ============")
+    for k, v in pairs(rule_bias_tablei) do
+        if(type(rule_bias_table_all[k]) ~= type(v)) then
+            error(k .. " is illegal parameter.")
         end
     end
 end
 
 local function multiRuleBias(tt)
-    check_rule_bias_table(tt.rule_bias_table)
+    for k, v in pairs(tt.rule_bias_table) do
+        if(type(v) ~= "table") then
+            error("All elements of rule_bias_table must be table")
+        end
+        check_rule_bias_tablei(v)
+    end
 
     local topTable = _G[tt.param_table_name]
     local backup_table = mydeepcopy(topTable.RULE_TABLE)
@@ -354,8 +335,9 @@ local function multiRuleBias(tt)
     DT.execute_function("AppMainRuleRedissection")
     for k, v in pairs(tt.rule_bias_table) do
         if(type(v) ~= "table") then
-            error("must be a table")
+            error("rule_bias_table must be a table")
         end
+        topTable.RULE_TABLE = mydeepcopy(backup_table)
         update_rule_bias_table(topTable.RULE_TABLE, v)
         DT.execute_function("ruleAppReinit")
         DT.execute_function("AppMainRuleBias")
@@ -386,7 +368,7 @@ local function AppInit()
         param_table_name="TOP",
         key=1,
         debug_output=out_debug,
-        MASK1={
+        MASK1 = {
             MAIN = graphics, --target,
             debug_type = debugOut,
         }
