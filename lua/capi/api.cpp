@@ -163,6 +163,28 @@ void definetest()
 
 }
 
+static int dt_get_patchsize(lua_State* L)
+{
+    int r = ud->getHscanMode() ? ApiContext::CELL : ApiContext::P;
+    int n = lua_gettop(L);
+    if (n > 0) {
+        r = luaL_checkint(L, 1);
+    }
+    bl_rect_t rect;
+    get_patchrect(ud, r, &rect);
+    dt_ii_t* a = ud->getII();
+    double width = DT_I2U(a, (rect.right - rect.left));
+    double height = DT_I2U(a, (rect.top - rect.bottom));
+    lua_newtable(L);
+    lua_pushstring(L, "width");
+    lua_pushnumber(L, width);
+    lua_settable(L, -3);
+    lua_pushstring(L, "height");
+    lua_pushnumber(L, height);
+    lua_settable(L, -3);
+    return 1;
+}
+
 int main(void)
 {
     //stackDumpTest();

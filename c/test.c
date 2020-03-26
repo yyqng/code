@@ -81,13 +81,36 @@ void print_env()
 void print_env2()
 {
 }
-
+void switch_case0(int input)
+{
+    switch (input) {
+        case 1:
+            printf("1\n");
+            printf("111\n");
+            break;
+        case 2:
+            printf("2\n");
+            printf("222\n");
+            break;
+        case 3:
+            printf("3\n");
+            printf("333\n");
+            break;
+        default:
+            printf("0\n");
+            printf("000\n");
+            break;
+    }
+}
 int main()
 {
 //    assert(0);
     //exit(3);
-    abort();
-    int *p = (int*)malloc(sizeof(int));
-    free(p);
+    //abort();
+    //int *p = (int*)malloc(sizeof(int));
+    //free(p);
+    switch_case0(1);
+    switch_case0(2);
+    switch_case0(15);
 //   print_env();
 }
