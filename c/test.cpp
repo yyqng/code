@@ -61,7 +61,7 @@ void print_env()
     char *repstext = getenv("reps");
     int reps = repstext ? atoi(repstext) : 2;
 
-    char *msg = getenv("msg");
+    const char *msg = getenv("msg");
     if (!msg) {
         msg = "Hello.";
     }
@@ -107,7 +107,7 @@ int main()
 //    assert(0);
     //exit(3);
     //abort();
-    //int *p = (int*)malloc(sizeof(int));
+    int *p = (int*)malloc(sizeof(int));
     //free(p);
     switch_case0(1);
     switch_case0(2);
