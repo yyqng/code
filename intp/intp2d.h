@@ -3,7 +3,7 @@
 #ifndef __INTP2D_H_
 #define __INTP2D_H_
 
-double tbxCalValueBy2DTable(
+double tbxCalValue2D(
         double x, double y,
         int *doInterpolation,
         double *table2D[2], int len[2],

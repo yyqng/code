@@ -4,7 +4,7 @@
 #define __INTP3D_H_
 
 
-static double tbxCalValueBy3DTable(
+double tbxCalValueBy3DTable(
         double x, double y, double z,
         int interpolation[3],
         double *table3D[3], int len[3],
