@@ -72,11 +72,14 @@ int constexpr size()
     return 0;
 }
 
-void const_test()
+int const_test()
 {
     constexpr int mf = 20;			//20是常量表达式
     constexpr int limit = mf + 1;   //mf+1是常量表达式
     constexpr int sz = size();      //只有当size是一个constexpr函数时，才是一条正确的声明语句
+    return mf;
+    return limit;
+    return sz;
 }
 
 void typedef_test()
@@ -88,30 +91,30 @@ void typedef_test()
     using sT = Test;
     sT a;
     auto size = sizeof(a);
-    printf("sizeof(a) = %d\n", size);
+    printf("sizeof(a) = %ld\n", size);
     size = sizeof(sT);
-    printf("sizeof(sT) = %d\n", size);
+    printf("sizeof(sT) = %ld\n", size);
 
     sT *p;
     sT v[5];
     size = sizeof(p);
-    printf("sizeof(p) = %d\n", size);
+    printf("sizeof(p) = %ld\n", size);
     size = sizeof(v);
-    printf("sizeof(v) = %d\n", size);
+    printf("sizeof(v) = %ld\n", size);
     p = v;
     size = sizeof(p);
-    printf("sizeof(p) = %d\n", size);
+    printf("sizeof(p) = %ld\n", size);
 }
 
 void auto_test()
 {
     auto i = 5 + 8;
     auto size = sizeof(i);
-    printf("sizeof(i) = %d\n", size);
+    printf("sizeof(i) = %ld\n", size);
 
     auto j = 5 + 8.0;
     size = sizeof(j);
-    printf("sizeof(i) = %d\n", size);
+    printf("sizeof(i) = %ld\n", size);
 }
 
 int iret(int r)
@@ -126,14 +129,14 @@ void decltype_test()
 {
     decltype(dret(0)) a = 1;
     auto size = sizeof(a);
-    printf("sizeof(a) = %d\n", size);
+    printf("sizeof(a) = %ld\n", size);
 
     decltype(iret(0)) b = 1;
     size = sizeof(b);
-    printf("sizeof(b) = %d\n", size);
+    printf("sizeof(b) = %ld\n", size);
 }
 
-void for_test()
+int for_test()
 {
     vector<vector<int>> v{{1, 2}, {3, 4}};
     v = {{5, 6}, {7, 8}};
@@ -151,10 +154,11 @@ void for_test()
 
     int ia[] = {0,1,2,3,4,5,6,7,8,9};
     auto size = end(ia) - begin(ia);
-    printf("sizeof(ia) = %d\n", size);
+    printf("sizeof(ia) = %ld\n", size);
 
     printf("8/3 = %d\n", 8/3);
     printf("-8/3 = %d\n", -8/3);
+    return (*it1)[0] + (*it3)[0] + (*it2)[0];
 }
 
 
@@ -259,5 +263,5 @@ int main()
     //fa_test();
     //fd_test();
     //constexpr_test();
-    TC tc;
+    //TC tc;
 }
