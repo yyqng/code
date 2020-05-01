@@ -1,0 +1,29 @@
+#0  ruleParamInitPerPatch (a=0x7fffebfa2000, param=0x7fffeb3aa018) at dtrule2.c:2272
+#1  0x00007fffe9a46c47 in ruleAppMain (a=0x7fffebfa2000) at dtrule2.c:2353
+#2  0x0000000000e37930 in dt_ldm_exec_uf(ApiContext*, char const*, LuaDynamicModule*) ()
+#3  0x0000000000e4f686 in dt_exec_function(lua_State*) ()
+#4  0x00007ffff7ccd0d8 in luaD_precall () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#5  0x00007ffff7cd6b2b in luaV_execute () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#6  0x00007ffff7ccd577 in luaD_call () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#7  0x00007ffff7ccccbe in luaD_rawrunprotected () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#8  0x00007ffff7ccd900 in luaD_pcall () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#9  0x00007ffff7cca0f3 in lua_pcall () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#10 0x0000000000e3667d in lcall(lua_State*, int, int) ()
+#11 0x000000000137d88e in ApiContext::runAppFunction(char const*, int) ()
+#12 0x00000000006aa210 in LuaAlgo::DoLua(VerifyJob*) ()
+#13 0x0000000000589c1a in VerifyComponent::HandleJob(Job*) ()
+#14 0x0000000003443358 in SAMode::Run() ()
+#15 0x0000000003425a21 in HostLeafApp::Run() ()
+#16 0x000000000342a50c in StageManager::ShellWait() ()
+#17 0x00000000007ddf84 in dt_run_stage(lua_State*) ()
+#18 0x00007ffff7ccd0d8 in luaD_precall () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#19 0x00007ffff7cd6b2b in luaV_execute () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#20 0x00007ffff7ccd577 in luaD_call () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#21 0x00007ffff7ccccbe in luaD_rawrunprotected () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#22 0x00007ffff7ccd900 in luaD_pcall () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#23 0x00007ffff7cca0f3 in lua_pcall () from /nfs/software/PWE/tachyon_flex_E20.02.0/rc1/LSF/lib64.avx/liblua.so
+#24 0x0000000000e3667d in lcall(lua_State*, int, int) ()
+#25 0x00000000007d384f in VerifyApp::ExecLuaShell() ()
+#26 0x00000000007d3ed9 in VerifyApp::RunLuaShell(int&, bool&) ()
+#27 0x00000000007d7b20 in VerifyApp::Initialize() ()
+#28 0x000000000046a95c in main ()
