@@ -10,6 +10,6 @@
 *.log
 *tags
 unixpro/bin/*
-c/test
+*test
 c/html
 c/latex
