@@ -163,6 +163,7 @@ void definetest()
 
 }
 
+/*
 static int dt_get_patchsize(lua_State* L)
 {
     int r = ud->getHscanMode() ? ApiContext::CELL : ApiContext::P;
@@ -184,6 +185,7 @@ static int dt_get_patchsize(lua_State* L)
     lua_settable(L, -3);
     return 1;
 }
+*/
 
 int main(void)
 {
