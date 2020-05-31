@@ -4,6 +4,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#define ERR_EXIT(m) do { perror(m); exit(EXIT_FAILURE);} while(0)
+
 
 
 const int SIZE = 10;
@@ -16,6 +18,7 @@ void test(Container c)
         c.insert(c.end(), Vtype());
     }
 }
+
 int testSocket()
 {
     int i = 0x12345678;
@@ -29,7 +32,7 @@ int testSocket()
     const char *cp = "192.168.0.100";
     in_addr_t addr = inet_addr(cp);
     printf("addr = %d\n", ntohl(addr));
-//int inet_aton(const char *cp, struct in_addr *inp);
+
     struct in_addr in;
     in.s_addr = addr;
     p = inet_ntoa(in);
@@ -38,8 +41,20 @@ int testSocket()
     return 0;
 }
 
+int echo_client()
+{
+    int lfd;
+    //if (lfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP) < 0) {
+    if ((lfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        ERR_EXIT("socket error\n");
+    }
+
+    return 0;
+}
+
 int main()
 {
     //test(vector<int>());
-    testSocket();
+    //testSocket();
+    echo_client();
 }
