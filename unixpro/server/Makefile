@@ -1,5 +1,5 @@
 TOP_DIR = ..
-TARGET = $(TOP_DIR)/bin/test-socketclient
+TARGET = $(TOP_DIR)/bin/server
 
 include $(TOP_DIR)/vars.mk
 include $(TOP_DIR)/rules.mk
@@ -29,7 +29,6 @@ CXXFLAGS += -Wno-sign-compare
 # LIBS += -lmylib
 INCDIR += -I$(TOP_DIR)/src/mycomm -I$(TOP_DIR)/src/include -I$(TOP_DIR)/src/database 
 LIBDIR += -L$(TOP_DIR)/lib
-LIBS += -pthread
 #LIBS += -lcomm -lgumbo -lboost_regex -ldatabase -locci -lclntsh -lnnz11 -lsqlite3
 # DEFS += -DMY_MACRO
 

@@ -18,16 +18,23 @@ typedef struct tsd {
 
 pthread_key_t key_td;
 
-void destructor(void*)
+void destructor(void* value)
 {
-    printf("destory..\n");
+    tsd* v = (tsd*)value;
+    delete v;
+    printf("destory.. free value\n");
 }
 
 void *thread_routine(void *arg)
 {
-    tsd_t value;
-    pthread_setspecific(key_td, (void *)&value);
-    printf("routine..%s\n", (char*) arg);
+    tsd_t *value = new tsd_t;
+    value->tid = pthread_self();
+    value->str = (char *) arg;
+    pthread_setspecific(key_td, (void *)value);
+    printf("%p value->tid = %ld value->str = %s, pthread_setspecific\n", value, value->tid, value->str);
+    sleep(1);                                                              
+    value = (tsd*)pthread_getspecific(key_td);                             
+    printf("%p value->tid = %ld value->str = %s, pthread_getspecific\n", value, value->tid, value->str);
     return NULL;
 }
 
