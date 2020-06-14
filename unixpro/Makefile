@@ -2,7 +2,7 @@ ifndef V
 	MAKEFLAGS += -s
 endif
 
-SUB_DIRS = algorithm
+SUB_DIRS = algorithm socketclient socketserver
 
 all: debug
 

@@ -1,29 +1,4 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <string.h>
-#include <stdlib.h>
- 
-#define VMRSS_LINE 17
-#define VMSIZE_LINE 13
-#define PROCESS_ITEM 14
- 
-typedef struct {
-    unsigned long user;
-    unsigned long nice;
-    unsigned long system;
-    unsigned long idle;
-}Total_Cpu_Occupy_t;
- 
- 
-typedef struct {
-    unsigned int pid;
-    unsigned long utime;  //user time
-    unsigned long stime;  //kernel time
-    unsigned long cutime; //all user time
-        unsigned long cstime; //all dead time
-}Proc_Cpu_Occupy_t;
- 
+#include "mem.h"
  
 //获取第N项开始的指针
 const char* get_items(const char*buffer ,unsigned int item){
@@ -172,7 +147,8 @@ unsigned int get_proc_virtualmem(unsigned int pid){
  
  
 //进程本身
-int get_pid(const char* process_name, const char* user = nullptr)
+//int get_pid(const char* process_name, const char* user = nullptr)
+int get_pid(const char* process_name, const char* user)
 {
     if(user == nullptr){
         user = getlogin();  
@@ -198,27 +174,3 @@ int get_pid(const char* process_name, const char* user = nullptr)
     return atoi(buff);
 }
  
- 
-int main(int argc, char *argv[])
-{
-    
-    if(argc < 2){
-        printf("Usage:test <process_name> [user]\n");
-        return 1;
-    }
-    
-    unsigned int pid=0;
-    
-    if(argc > 2){
-        pid = get_pid(argv[1],argv[2]);
-    }
-    else{
-        pid = get_pid(argv[1]);
-    }
-    
-    printf("pid=%d\n",pid);
-    printf("pcpu=%f\n",get_proc_cpu(pid));
-    printf("procmem=%d\n",get_proc_mem(pid));
-    printf("virtualmem=%d\n",get_proc_virtualmem(pid)); 
-    return 0;
-}
