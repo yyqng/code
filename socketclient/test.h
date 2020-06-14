@@ -49,6 +49,7 @@ public:
 };
 void algo();
 int otst();
+int test();
 
 int testmem();
 unsigned int get_proc_virtualmem(unsigned int pid);
