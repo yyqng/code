@@ -20,7 +20,7 @@ endif
 # DEFS		宏定义，-D<macro>，debug版本默认为空，release版本默认为-DNDEBUG
 
 # 修改编译选项示例（同时影响debug与release版本）
-# CXX_STD = -std=c++11
+#CXX_STD = -std=c++11
 # CFLAGS += -fPIC -other_options
 CXXFLAGS += -Wno-sign-compare
 # LNKFLAGS += -shared -other_options
