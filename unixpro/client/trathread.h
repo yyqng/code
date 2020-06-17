@@ -14,6 +14,8 @@
 #include <cstring>
 #include <pthread.h>
 #include <mutex> 
+#include <assert.h>
+#include <boost/thread.hpp>
 
 using namespace std;
 

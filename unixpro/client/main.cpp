@@ -2,6 +2,7 @@
 #include "thread.h"
 #include "mem.h"
 #include "stdthread.h"
+#include "trathread.h"
  
 int mem_test(int argc, char *argv[])
 {
@@ -33,6 +34,7 @@ int main()
     //testSocket();
     //echo_client();
     //thread_test();
-    stdthread_test();
+    //stdthread_test();
+    trathread_test();
     //set_mem_test();
 }
