@@ -16,6 +16,7 @@
 #include <mutex> 
 #include <assert.h>
 #include <boost/thread.hpp>
+#include <exception>
 
 using namespace std;
 

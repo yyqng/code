@@ -78,27 +78,36 @@ Some thread libraries support interruption, like boost::thread:
 There are many interruption pointers other than boost::this_thread::interruption_point(), see the reference for details.
 https://www.boost.org/doc/libs/1_54_0/doc/html/thread/thread_management.html#thread.thread_management.tutorial.interruption
 */
+
 void repeating_itself()
 {
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 }
 void p9()
 {
 	auto history = []() {
 		try {
 			for (;;) {
+                printf("before repeating_itself\n");
 				repeating_itself();
+                printf("before interruption_point\n");
 				boost::this_thread::interruption_point();
+                printf("afterinterruption_point\n");
 			}
 		} catch (boost::thread_interrupted&) {
+            printf("catch thread_interrupted\n");
 			return;
 		}
 	};
 
+    printf("before boost::thread\n");
 	boost::thread tr(history);
 	// we learn from it
+    printf("before tr.interrupt\n");
 	tr.interrupt();
+    printf("before tr.join\n");
 	tr.join();
+    printf("after tr.join\n");
 }
 
 
@@ -106,32 +115,37 @@ void p9()
 //*
 //tpool supports CancelableThread, its mechanism likes:
 //*/
-//void p10()
-//{
-//	bool is_cancel_request = false;
-//	auto check_cancellation = [&] {
-//		if (is_cancel_request) {
-//			throw std::exception("cancelled");
-//		}
-//	}
-//	auto history = [&]() {
-//		try {
-//			for (;;) {
-//				repeating_itself();
-//				check_cancellation();
-//			}
-//		} catch (std::exception&) {
-//			return;
-//		}
-//	};
-//
-//	std::thread tr(history);
-//	// we learn from it
-//	is_cancel_request = true;
-//	tr.join();
-//}
-//
-//
+void p10()
+{
+	bool is_cancel_request = false;
+	auto check_cancellation = [&] {
+		if (is_cancel_request) {
+            printf("is_cancel_request is true and will throw std::exception\n");
+			//throw std::exception("cancelled");
+			throw std::exception();
+		}
+	};
+	auto history = [&]() {
+		try {
+			for (;;) {
+                printf("before repeating_itself\n");
+				repeating_itself();
+				check_cancellation();
+			}
+		} catch (std::exception&) {
+            printf("catch exception\n");
+			return;
+		}
+	};
+
+	std::thread tr(history);
+	// we learn from it
+	is_cancel_request = true;
+    printf("After set is_cancel_request = true\n");
+	tr.join();
+}
+
+
 ///*
 //We can only stop a thread in specified interruption point and check cancellation point.
 //We can not promise the thread will stop as soon as you call interruption or cancel.
@@ -148,56 +162,59 @@ void p9()
 //One mutex can only be owned by one thread at a time, once a thread locks a mutex, other thread which trying to like the mutex will block until the lock is released.
 //
 //mutex usually has the following interface:
-//class mutex : boost::noncopyable
-//{
-//    void lock();
-//    void unlock();
-//    bool try_lock();
-//};
-//*/
-//void p15()
-//{
-//	int count = 0;
-//	std::mutex mtx;
-//
-//	auto counter = [&]() {
-//		for (int i = 0; i < 42; i++) {
-//			mtx.lock();
-//			count++;
-//			mtx.unlock();
-//		}
-//	};
-//
-//	std::thread tr1(counter);
-//	std::thread tr2(counter);
-//
-//	tr1.join();
-//	tr2.join();
-//	assert(count == 84);
-//}
-//
-//
-//
-//
-///*
-//lock_guard
-//For possible exceptions or forgetting to unlock, mutex should use with RAII objects, like std::lock_guard:
-//std::lock_guard will mutex in constructor and unlock in destructor. So the mutex will unlock when the lock_guard instance is out of scope.
-//*/
-//void p16()
-//{
-//	auto counter = [&]() {
-//		for (int i = 0; o < 42; i++) {
-//			std::lock_guard<std::mutex> lk(mtx);
-//			count++;
-//		}
-//	};
-//}
-//
-//
-//
-//
-//
+class mutex : boost::noncopyable
+{
+    void lock();
+    void unlock();
+    bool try_lock();
+};
+void p15()
+{
+	long count = 0;
+    const long rt = 100000000; //assert failed
+//    const long rt = 10000; //assert success
+	std::mutex mtx;
+
+	auto counter = [&]() {
+		for (long i = 0; i < rt; i++) {
+	//		mtx.lock();
+			count++;
+	//		mtx.unlock();
+		}
+	};
+
+	std::thread tr1(counter);
+	std::thread tr2(counter);
+
+	tr1.join();
+	tr2.join();
+	assert(count == 2 * rt);
+}
+
+
+
+
+/*
+lock_guard
+For possible exceptions or forgetting to unlock, mutex should use with RAII objects, like std::lock_guard:
+std::lock_guard will mutex in constructor and unlock in destructor. So the mutex will unlock when the lock_guard instance is out of scope.
+*/
+void p16()
+{
+	std::mutex mtx;
+    int count = 0;
+	auto counter = [&]() {
+		for (int i = 0; i < 42; i++) {
+			std::lock_guard<std::mutex> lk(mtx);
+			count++;
+		}
+	};
+}
+
+
+
+
+
 ///*
 //In tpool, tpool::sync::MutexLocker provides the same functionality:
 //*/
@@ -995,5 +1012,9 @@ void p9()
 void trathread_test()
 {
 //    p7_0();
-    p7_1();
+//    p7_1();
+//    p9();
+//    p10();
+//    p15();
+    p16();
 }

@@ -3,6 +3,7 @@
 #include "mem.h"
 #include "stdthread.h"
 #include "trathread.h"
+#include "test.h"
  
 int mem_test(int argc, char *argv[])
 {
@@ -37,4 +38,5 @@ int main()
     //stdthread_test();
     trathread_test();
     //set_mem_test();
+    //test();
 }
