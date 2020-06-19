@@ -171,7 +171,7 @@ class mutex : boost::noncopyable
 void p15()
 {
 	long count = 0;
-    const long rt = 100000000; //assert failed
+    const long rt = 100000; //assert failed
 //    const long rt = 10000; //assert success
 	std::mutex mtx;
 
@@ -201,23 +201,31 @@ std::lock_guard will mutex in constructor and unlock in destructor. So the mutex
 */
 void p16()
 {
+	long count = 0;
+    const long rt = 100000; //assert failed
 	std::mutex mtx;
-    int count = 0;
 	auto counter = [&]() {
-		for (int i = 0; i < 42; i++) {
+		for (long i = 0; i < rt; i++) {
 			std::lock_guard<std::mutex> lk(mtx);
 			count++;
 		}
 	};
+
+	std::thread tr1(counter);
+	std::thread tr2(counter);
+
+	tr1.join();
+	tr2.join();
+	assert(count == 2 * rt);
 }
 
 
 
 
 
-///*
-//In tpool, tpool::sync::MutexLocker provides the same functionality:
-//*/
+/*
+In tpool, tpool::sync::MutexLocker provides the same functionality:
+*/
 //class MutexLocker : private boost::noncopyable {
 //public:
 //    explicit MutexLocker(Mutex& m) : m_mutex(m) { m_mutex.Lock(); }
@@ -227,42 +235,62 @@ void p16()
 //private:
 //    Mutex& m_mutex;
 //};
-//
-///*
-//Recursive Mutex
-//std::recursive_mutex can be locked multiple times by the same thread:
-//*/
-//class Counter : private boost::noncopyable {
-//public:
-//    Counter(): m_count(0){}
-//    void add() {
-//        std::lock_guard<std::recursive_mutex> lk(m_mutex);
-//        add_internal();
-//    }
-//private:
-//    void add_internal() {
-//        std::lock_guard<std::recursive_mutex> lk(m_mutex);
-//        m_count++;
-//    }
-//    std::recursive_mutex m_mutex;
-//    int m_count;
-//};
-//
-///*
-//Recursive Mutex is dangerous for beginner
-//std::recursive_mutex allows class state be modified during the mutex is locked.
-//*/
-//class Counter;
+
+/*
+Recursive Mutex
+std::recursive_mutex can be locked multiple times by the same thread:
+*/
+class Counter : private boost::noncopyable {
+public:
+    Counter(): m_count(0){}
+    void add() {
+        std::lock_guard<std::recursive_mutex> lk(m_mutex);
+        add_internal();
+    }
+    long get_count() {
+        return m_count;
+    }
+private:
+    void add_internal() {
+        std::lock_guard<std::recursive_mutex> lk(m_mutex);
+        m_count++;
+    }
+    std::recursive_mutex m_mutex;
+    long m_count;
+};
+
+void px1()
+{
+    const long rt = 100000; //assert failed
+    Counter counter;
+	auto counterf = [&]() {
+		for (long i = 0; i < rt; i++) {
+			counter.add();
+		}
+	};
+
+	std::thread tr1(counterf);
+	std::thread tr2(counterf);
+
+	tr1.join();
+	tr2.join();
+	assert(counter.get_count() == 2 * rt);
+}
+
+/*
+Recursive Mutex is dangerous for beginner
+std::recursive_mutex allows class state be modified during the mutex is locked.
+*/
+//class Counter2;
 //class Proxy {
-//    Counter& m_counter;
-//    void hook() {
-//        m_counter.add();
-//    }
-//};
-//
-//class Counter : private boost::noncopyable {
 //public:
-//    Counter(): m_count(0){}
+//    Proxy(Counter2 &c) : m_counter(c) {}
+//    Counter2 &m_counter;
+//    void hook();
+//};
+//class Counter2 : private boost::noncopyable {
+//public:
+//    Counter2(): m_count(0){}
 //    void add() {
 //        std::lock_guard<std::recursive_mutex> lk(m_mutex);
 //        add_internal();
@@ -272,45 +300,67 @@ void p16()
 //        std::lock_guard<std::recursive_mutex> lk(m_mutex);
 //        m_count++;
 //        if (m_count < 42) {
-//            m_proxy->hook();
+//            m_proxy.hook();
 //        }
 //    }
 //    std::recursive_mutex m_mutex;
 //    int m_count;
 //    Proxy m_proxy;
 //};
-//
-//
-///*
-//Pass Unnamed lock_guard as Argument
-//Don't use recursive mutex as possible as you can, deadlock is better than unexpected state.
-//
-//But we still need to guarantee that private methods are called correctly with lock.
-//
-//We can pass the lock_guard as extra argument explicitly:
-//*/
-//class Counter : private boost::noncopyable {
-//public:
-//    Counter(): m_count(0){}
-//    void add() {
-//        std::lock_guard<std::mutex> lk(m_mutex);
-//        add_internal(lk);
-//    }
-//private:
-//    void add_internal(const std::lock_guard&) {
-//        m_count++;
-//    }
-//    std::mutex m_mutex;
-//    int m_count;
-//};
-//
-//
-///*
-//Condition Variable
-//Condition variable provide a mechanism for one or many threads to wait for notification from another thread that a particular condition has become true.
-//
-//usually has the following interface:
-//*/
+//void Proxy::hook() {
+//    m_counter.add();
+//}
+
+/*
+Pass Unnamed lock_guard as Argument
+Don't use recursive mutex as possible as you can, deadlock is better than unexpected state.
+
+But we still need to guarantee that private methods are called correctly with lock.
+
+We can pass the lock_guard as extra argument explicitly:
+*/
+class Counter3 : private boost::noncopyable {
+public:
+    Counter3(): m_count(0){}
+    void add() {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        add_internal(lk);
+    }
+    long get_count() {
+        return m_count;
+    }
+private:
+    void add_internal(const std::lock_guard<std::mutex> &) {
+        m_count++;
+    }
+    std::mutex m_mutex;
+    int m_count;
+};
+void px3()
+{
+    const long rt = 100000; //assert failed
+    Counter3 counter;
+	auto counterf = [&]() {
+		for (long i = 0; i < rt; i++) {
+			counter.add();
+		}
+	};
+
+	std::thread tr1(counterf);
+	std::thread tr2(counterf);
+
+	tr1.join();
+	tr2.join();
+	assert(counter.get_count() == 2 * rt);
+}
+
+
+/*
+Condition Variable
+Condition variable provide a mechanism for one or many threads to wait for notification from another thread that a particular condition has become true.
+
+usually has the following interface:
+*/
 //class condition_variable : boost::noncopyable
 //{
 //    void wait(mutex&);
@@ -347,66 +397,99 @@ void p16()
 //};
 //
 //
-///*
-//Example to use condition_variable:
-//*/
-//void p24()
-//{
-//	int the_answer = -1;
-//	bool the_answer_is_ready = false; // the condition we waiting for
-//	std::mutex mtx; // protect the_answer and the_answer_is_ready
-//	std::condition_variable cond;
-//
-//	std::thread tr([&]() {
-//		// lock condition than modify
-//		std::lock_guard<std::mutex> lk;
-//		the_answer = 42;
-//		the_answer_is_ready = true;
-//		// notify waiters after condition modified
-//		cond.notify_all();
-//	});
-//
-//	std::unique_lock<std::mutex> ulk(mtx);
-//	while (!the_answer_is_ready) { // keep waiting when condition is not what we want
-//		// wait contains three step: 
-//		// 1. unlock ulk
-//		// 2. hang this thread until being notified
-//		// 3. relock ulk after notified
-//		cond.wait(ulk);
-//	}
-//	assert(the_answer_is_ready == true);
-//	assert(the_answer == 42);
-//	tr.join();
-//}
-//
-//
-//
-//
-///*
-//Why we need a while loop waiting?
-//notify_all will wakeup all waiting thread, which may change the_answer_is_ready before other thread return from wait
-//Spurious wakeup allowed to return from wait even if not notified
-//Thinking questions:
-//why the_answer_is_ready is necessary in this case? What will happen if we remove it?
-//
-//
-//The general usage pattern:
-//One thread locks a mutex and then calls wait on an instance of condition_variable.
-//wait will atomically add the thread to waiting list of the condition variable, and unlock the mutex. This allows other threads to acquire the mutex to update the shared data and associated condition.
-//When the thread is waken, the mutex will be locked again before the call to wait returns.
-//When return from the wait, it checks to see if the appropriate condition is now true, and continues if so.
-//If the condition is not true, then the thread will calls wait again to resume waiting.
-//Considering that writing a while loop is cumbersome, boost(and c++11) provides a predicated version:
-//cond.wait(ulk, [&](){return the_answer_is_ready;});
-//
-//
-//mutex + condition_variable are the basic synchronization tool
-//In Theory, mutex + condition_variable can achieve any synchronization scene we can imagine.
-//And we can use mutex + condition_variable to implement other advanced synchronization tools.
-//(Semaphore have equal ability, we will discuss it next)
-//*/
-//
-//
+/*
+Example to use condition_variable:
+*/
+void p24()
+{
+	int the_answer = -1;
+	bool the_answer_is_ready = false; // the condition we waiting for
+	std::mutex mtx; // protect the_answer and the_answer_is_ready
+	std::condition_variable cond;
+
+	auto f1 = [&]() {
+		// lock condition than modify
+		std::lock_guard<std::mutex> lk(mtx);
+		the_answer = 42;
+		the_answer_is_ready = true;
+		// notify waiters after condition modified
+        printf("thread1 cond.notify_all\n");
+		cond.notify_all();
+	};
+	std::thread tr1(f1);
+
+	std::unique_lock<std::mutex> ulk(mtx);
+	auto f2 = [&]() {
+	    while (!the_answer_is_ready) { // keep waiting when condition is not what we want
+	    	// wait contains three step: 
+	    	// 1. unlock ulk
+	    	// 2. hang this thread until being notified
+	    	// 3. relock ulk after notified
+            printf("thread2 waiting\n");
+	    	cond.wait(ulk);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            printf("thread2 recived\n");
+	        assert(the_answer_is_ready == true);
+	        assert(the_answer == 42);
+		    cond.notify_all();
+	    }
+        //printf("thread2 is waiting\n");
+		//cond.wait(ulk);
+		//// lock condition than modify
+		//std::lock_guard<std::mutex> lk(mtx);
+		//the_answer = 42;
+		//the_answer_is_ready = true;
+		//// notify waiters after condition modified
+        //printf("thread2 cond.notify_all\n");
+		//cond.notify_all();
+	};
+	std::thread tr2(f2);
+    printf("main thread sleep_for 1s\n");
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+	while (!the_answer_is_ready) { // keep waiting when condition is not what we want
+		// wait contains three step: 
+		// 1. unlock ulk
+		// 2. hang this thread until being notified
+		// 3. relock ulk after notified
+        printf("waiting\n");
+		cond.wait(ulk);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        printf("recived\n");
+	}
+	assert(the_answer_is_ready == true);
+	assert(the_answer == 42);
+	tr1.join();
+	tr2.join();
+}
+
+
+
+
+/*
+Why we need a while loop waiting?
+notify_all will wakeup all waiting thread, which may change the_answer_is_ready before other thread return from wait
+Spurious wakeup allowed to return from wait even if not notified
+Thinking questions:
+why the_answer_is_ready is necessary in this case? What will happen if we remove it?
+
+
+The general usage pattern:
+One thread locks a mutex and then calls wait on an instance of condition_variable.
+wait will atomically add the thread to waiting list of the condition variable, and unlock the mutex. This allows other threads to acquire the mutex to update the shared data and associated condition.
+When the thread is waken, the mutex will be locked again before the call to wait returns.
+When return from the wait, it checks to see if the appropriate condition is now true, and continues if so.
+If the condition is not true, then the thread will calls wait again to resume waiting.
+Considering that writing a while loop is cumbersome, boost(and c++11) provides a predicated version:
+cond.wait(ulk, [&](){return the_answer_is_ready;});
+
+
+mutex + condition_variable are the basic synchronization tool
+In Theory, mutex + condition_variable can achieve any synchronization scene we can imagine.
+And we can use mutex + condition_variable to implement other advanced synchronization tools.
+(Semaphore have equal ability, we will discuss it next)
+*/
+
+
 ///*
 //Semaphore
 //A (Counting) Semaphore is a synchronization tool that can control access shared resources.
@@ -1016,5 +1099,8 @@ void trathread_test()
 //    p9();
 //    p10();
 //    p15();
-    p16();
+//    p16();
+//    px1();
+//    px3();
+    p24();
 }

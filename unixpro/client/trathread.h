@@ -17,6 +17,7 @@
 #include <assert.h>
 #include <boost/thread.hpp>
 #include <exception>
+#include <condition_variable>
 
 using namespace std;
 
