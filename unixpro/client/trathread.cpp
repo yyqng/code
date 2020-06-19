@@ -1092,6 +1092,539 @@ And we can use mutex + condition_variable to implement other advanced synchroniz
 //*/
 //
 //
+///*
+What is Thread Safety?
+A class is thread-safe if it behaves correctly when accessed from multiple threads, regardless of the scheduling or interleaving of the execution of those threads by the runtime environment.
+thread-safe classes encapsulate any needed synchronization so that clients need not provide their own.
+Stateless objects are always thread-safe.
+How to Achieve Thread-safety
+1. Stateless Implementations
+
+It's always thread-safe if a method neither relies on external state nor maintains state at all.
+
+2. Re-entrancy
+
+Saving state information in local variables instead of static or global variables or other non-local state.
+
+Be careful with third-party libraries which may have static or global state.
+
+3. Thread-Local Storage
+
+Variables are localized so that each thread has its own private copy, the code which accesses them might be executed simultaneously by another thread.
+
+But carefully use in thread pool, because you don't know which worker thread will execute your task.
+4. Immutable Objects
+
+A class instance is immutable when its internal state can't be modified after it has been constructed.
+
+Mutable (non-const) operations can then be implemented in such a way that they create new objects instead of modifying existing ones.
+
+5. Mutual exclusion
+
+Access to shared data is serialized using mechanisms that ensure only one thread reads or writes to the shared data at any time, e.g. std::mutex.
+
+6. Atomic operation
+
+Shared data is accessed by using atomic operations which cannot be interrupted by other threads, e.g. std::atomic
+
+For operation depends on internal states, put state check and operation in one synchronized method, e.g. compare_and_change instead of compare then change
+
+Thread Safe Class
+Thread-safe construction:
+
+don't register callback in constructor
+don't pass this to any other cross-thread object
+two-phase construction
+*/
+
+class Observable;
+class Foo : public Observer {
+public:
+    explicit Foo(Observable* s) {
+        s->register(this); // BAD: may be notify before construction finish
+    }
+};
+
+/*
+Thread-safe destruction:
+
+don't use naked pointer to handle dynamic allocated thread-safe object, use smart pointer instead.
+destructor doesn't need to be protected by it's member mutex
+*/
+
+class Foo;
+
+Foo* ins = new Foo;
+
+std::thread tr1([&]() {
+    delete ins;
+});
+
+std::thread tr2([&]() {
+    delete ins;
+});
+
+// BAD: double free
+
+/*
+Thread-safe copy/move constructors:
+
+if a class contains condition variables, it should be noncopyable.
+if only contains mutex, don't provide copy/move constructor until you really need it:
+*/
+
+// use c++11 delegation constructor if your data member don't have default constructor
+class Counter {
+    std::mutex m_mtx;
+    int m_count = 0;
+    Counter(const Counter& that, const std::lock_guard<std::mutex>&): m_count(that.m_count) {}
+public:
+    Counter(const Counter& that): Counter(that, std::lock_guard<std::mutex>(that.m_mtx)) {}
+}
+
+/*
+Thread-safe assignment and swap:
+
+if a class contains condition variables, it should not provide assignment operator or swap.
+if only contains mutex, don't provide assignment operator and swap until you really need it:
+*/
+void swap(Counter& lhs, Counter& rhs) {
+    if (&lhs == &rhs) {
+        return;
+    }
+    std::lock(lhs.m_mtx, rhs.m_mtx);
+    std::lock_guard<std::mutex> lock_l(lhs.m_mtx, std::adopt_lock);
+    std::lock_guard<std::mutex> lock_r(rhs.m_mtx, std::adopt_lock);
+    swap(lhs.m_count, rhs.m_count);
+}
+
+/*
+mutable mutex member for const methods:
+
+const methods still need to be protected by mutex for other synchronization tools.
+
+But lock is a non-const method, so we need to declare member mutex as mutable:
+*/
+class Counter {
+    mutable std::mutex m_mutex;
+    int m_count = 0;
+    void add() {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        m_count++;
+    }
+    int count() const {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        return m_count;
+    }
+};
+
+
+/*
+mutable member should be thread-safe:
+
+If you want a member to be mutable, it should be thread safe.
+*/
+class Counter {
+    mutable std::mutex m_mutex; // ok, mutex is already thread safe
+    mutable std::atomic<int> m_called_count; // ok, atomic already is thread safe
+    mutable std::string m_last_error; // no, std::string is not thread safe, but ok if you protected it by m_mutex
+};
+
+/*
+Thread safety of standard libraries
+standard library can concurrent read, they promised that const methods are bitwise const or internal synchronized.
+data race if one thread writes to some location by other thread read this location concurrently without synchronization
+implementations are required to avoid data races when the contents of the contained object in different elements in the same sequence, excepting std::vector<bool>, are modified concurrently
+*/
+
+/*
+Memory Management
+Smart Pointer
+Concurrent Memory Allocation
+Thread Local Storage
+False Sharing
+Atomic
+
+Smart Pointer
+It's not easy to delete a pointer which may reference in different thread. we can use smart pointer like boost::shared_ptr to handle it.
+Reference counter of shared pointer is atomically, so copy and reset a boost::shared_ptr is thread safe.
+*/
+std::shared_ptr<int> the_answer = std::make_shared<int>(42);
+std::thread tr([the_answer]() {
+    std::shared_ptr<int> copy = the_answer; //OK: copy is safe
+    assert(*copy == 42);
+});
+tr.join();
+assert(*the_answer == 42);
+
+
+/*
+Concurrent assign (or reset) same instance of shared pointer will cause data race:
+
+In future, boost::atomic_shared_pointer and c++20 std::atomic<std::shared_ptr<T>> can help with this.
+
+Remember, only "control block" of shared_ptr is thread safe, associated data is not!
+*/
+std::shared_ptr<int> the_answer;
+std::thread tr([&the_answer]() {
+    the_answer = std::make_shared<int>(42); // BUG: assign is not safe
+});
+the_answer = std::make_shared<int>(233);
+tr.join();
+assert(*the_answer == 42); // Undefined!
+
+
+/*
+Concurrent Memory Allocation
+Allocating memory from the system heap can be an expensive operation due to a lock used by system runtime libraries to synchronize access to the heap.
+
+Contention on this lock can limit the performance benefits from multithreading.
+
+Third-party allocators jemalloc or tcmalloc can help with this, and they are easy to use:
+
+env LD_PRELOAD=libjemalloc.so /path/to/your/binary
+*/
+
+
+/*
+Thread Local Storage
+Where a single-threaded application would use static or global data, this could lead to contention, deadlock or data corruption in a multi-threaded application.
+
+Thread local storage allows multi-threaded applications to have a separate instance of a given data item for each thread.
+the output will be(example in vs2019):
+
+construct in 17888
+main thread 17888
+construct in 19316
+worker thread 19316
+destruct in 19316
+destruct in 17888
+*/
+struct Answer {
+    Answer() { 
+        std::cout << "construct in " << std::this_thread::get_id() << std::endl;
+    }
+    ~Answer() { 
+        std::cout << "destruct in " << std::this_thread::get_id() << std::endl;
+    }
+    int m_the_answer = 0;
+};
+
+thread_local Answer the_answer;
+
+int main() { 
+    std::cout << "main thread " << std::this_thread::get_id() << std::endl;
+    std::thread tr([]() { 
+        std::cout << "worker thread " << std::this_thread::get_id() << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    });
+    tr.join();
+    return 0;
+}
+
+/*
+boost::thread_specific_ptr
+boost::thread_specific_ptr provides a portable mechanism for thread-local storage when you don't have C++11 support.
+
+You need to call reset before use it in each thread and the pointed object will be delete when a thread exits.
+*/
+#include <boost/thread/tss.hpp>
+
+static boost::thread_specific_ptr<Answer> the_answer;
+
+if (!the_answer.get()) {
+    the_answer.reset(new Answer());
+}
+
+
+/*
+False Sharing
+False sharing occurs when threads on different processors modify variables that reside on the same cache line. This invalidates the cache line and forces a memory update to maintain cache coherency.
+
+Thread-local storage or local variables can be ruled out as sources of false sharing.
+
+In following case, Foo::a and Foo::b will false sharing, tr1's i and tr2's i will false sharing.
+*/
+struct Foo {
+    int32_t a = 0;
+    int32_t b = 0;
+};
+
+int main() {
+    const int32_t n = 1000 * 1000 * 1000;
+    Foo foo;
+    std::thread tr1([&]() {
+        for (int32_t i = 0; i < n; ++i) {
+            foo.a++;
+        }
+    });
+    std::thread tr2([&]() {
+        for (int32_t i = 0; i < n; ++i) {
+            foo.b++;
+        }
+    });
+    tr1.join();
+    tr2.join();
+    return 0;
+}
+
+
+/*
+We can find cache line size from /sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size, example 64 byte, then we can use `__declspec (align(64))` to fix this:
+*/
+struct Foo {
+    __declspec (align(64)) int32_t a = 0;
+    __declspec (align(64)) int32_t b = 0;
+};
+
+int main() {
+    const int32_t n = 1000 * 1000 * 1000;
+    Foo foo;
+    std::thread tr1([&]() {
+        for (__declspec (align(64)) int32_t i = 0; i < n; ++i) {
+            foo.a++;
+        }
+    });
+    std::thread tr2([&]() {
+        for (__declspec (align(64)) int32_t i = 0; i < n; ++i) {
+            foo.b++;
+        }
+    });
+    tr1.join();
+    tr2.join();
+    return 0;
+}
+
+
+/*
+Atomic
+Concurrent operations on POD(Plain Old Data) , e.g. int32_t, are not safe.
+
+The atomic library provides components for fine-grained atomic operations allowing for lockless concurrent programming.
+
+Each atomic operation is indivisible with regards to any other atomic operation that involves the same object.
+
+Atomic objects are free of data races.
+*/
+class Counter : public boost::noncopyable {
+    std::atomic<int> m_count = 0;
+public:
+    void add(int value) {
+        m_count.fetch_add(value);
+    }
+    int value() {
+        return m_count.load();
+    }
+}
+
+
+/*
+C++ 11 provides std::atomic<T>, and some type alias, like std::atomic_int32_t is equal to std::atomic<int32_t>.
+
+Template parameter T require trivially copyable, which mean it should able to copy by std::memcpy.
+
+The sizeof T decides whether std::atomic<T> is lock free:
+*/
+
+
+struct Counter {
+    int64_t count = 0;
+};
+
+struct Foo {
+    int64_t a = 0;
+    int64_t b = 0;
+};
+
+std::atomic<Counter> c;
+assert(c.is_lock_free());
+
+std::atomic<Foo> f;
+assert(!f.is_lock_free());
+
+
+/*
+Concurrent Design Pattern
+Singleton
+Observer
+Active Object
+Singleton
+Thread-safe singleton is hard to implement before C++11. Fortunately, in C++ 11, compiler ensures that concurrent execution shall wait for static local variable being initialized.
+*/
+static Singleton& instance() { 
+    static Singleton s_instance;
+    return s_instance;
+}
+
+
+/*If you want pointer, std::call_once can help:
+*/
+class Singleton {
+public:
+    static Singleton* instance() { 
+        std::call_once(s_once_flag, &Singleton::init);
+        return sp_instance;
+    }
+private:
+    static Singleton* sp_instance;
+    static std::once_flag s_once_flag;
+    static void init() {
+        sp_instance = new Singleton;
+    }
+}
+
+
+
+/*
+For double-check locking, we have std::atomic in C++11, it can acts as a memory barrier:
+*/
+class Singleton {
+public:
+    static Singleton* instance() { 
+        Singleton* tmp = asp_instance.load();
+        if (!tmp) {
+            std::lock_guard<std::mutex> lk(s_mutex);
+            tmp = instance.load();
+            if (!tmp) {
+                tmp = new Singleton;
+                asp_instance.store(tmp);
+            }
+        }
+    }
+    static std::atomic<Singleton*> asp_instance;
+    static std::mutex s_mutex;
+}
+
+
+/*
+Observer
+Thread-safe Observer pattern is important in "future continuation" or "future watcher":
+*/
+boost::future<int> f = boost::async([](){ return 42;});
+boost::future<std::string> fs = f.then([](boost::future<int> prev) {
+    int the_answer = prev.get();
+    return std::to_string(the_answer);
+});
+assert(fs.get() == "42");
+
+
+
+/*
+The key points to implementation are:
+
+register weak_ptr or shared_ptr of observer to observable, so we don't need to maintains the life cycle of observer instance.
+copy all observer pointers and remove expired under lock guard when notify, so we don't need to worry about registering new observers during notification.
+call observer's notify method out of lock guard, so we can register new observer to observable during notification and notification won't block observable too much time.
+boost::future is an example registered shared_ptr; tpool::ObservableFutureTask is an example registered weak_ptr.
+*/
+void Observable::notify() {
+    std::vector<std::weak_ptr<Observer>>> to_notify;
+    {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        for (const auto& wp : m_observers) {
+            if (!wp.expired()) {
+                to_notify.push_back(wp);
+            }
+        }
+        m_observers = to_notify;
+    }
+    for (const auto& wp : to_notify) {
+        auto sp = wp.lock();
+        if (sp) {
+            sp->notify();
+        }
+    }
+}
+
+
+
+/*
+Active Object
+The active object design pattern decouples method execution from method invocation for objects that each reside in their own thread of control.
+
+In some case, it can help us handle some thread un-safe modules that we can not change. It sounds like "call concurrent, execute serial".
+
+Take counter as a simple example:
+*/
+class Counter {
+    int m_count = 0;
+public:
+    int add(int value) { 
+        m_count += value; 
+        return m_count;
+    }
+};
+/*
+It's unsafe for concurrent access, we can apply active object pattern for it:
+
+CounterProxy can concurrency access now.
+*/
+class CounterProxy {
+    Counter m_counter;
+    boost::serial_executor m_executor;
+public:
+    boost::future<int> add(int value) {
+        return boost::async(m_executor, [=] {
+            return this->m_counter.add(value);
+        });
+    }
+};
+
+
+
+/*
+Other Tips
+mutex is enough for most case
+You don't need to use spin-lock explicitly, because mutex was implemented like spin-lock in modern os.
+
+be wary of read-write lock
+Unless the hold time for the lock is long, read-write lock will scale no better than single mutex.
+
+Use lock-free structure only if you absolutely must
+It's hard to implement or use/debug lock-free structure, even for experts.
+
+Read reference, documentation, source code(optional) before use a thread library
+Different library may have some special implementation. And we should remember that third-party lib may have bugs, even boost or other well known third-party lib.
+
+Further Reading
+Anthony Williams, C++ Concurrency in Action: Practical Multithreading, 2012
+Brian Goetz, Java Concurrency in Practice, 2006
+Atul S. Khot, Concurrent Patterns and Best Practices, 2018
+*/
+
+/*
+选择题
+1. 对于一次性异步计算的结果, 以下哪个同步工具比较合适:(单选, 5分)
+A. blocking queue, B. latch, C. future, D. mutex
+
+2. 对于生产者消费者问题, 以下哪个同步工具比较合适:(单选, 5分)
+A. blocking queue, B. latch, C. future, D. mutex
+
+3. 以下哪个不是线程安全的实现方法:(单选, 5分)
+A. static local variable
+B. thread local sotrage
+C. mutual exclusion
+D. stateless implementation
+
+4. 以下的说法, 正确的是:(多选, 10分, 错选得0分, 少选得5分)
+A. boost::future::then是线程安全observer模式的体现
+B. 为了实现线程安全c++类, mutable 成员变量本身应当是线程安全的
+C. 跨线程引用的对象, 可以使用智能指针管理其生命周期
+D. 互斥量和条件变量都是不可复制的
+E. std::thread提供了cancel机制
+
+问答题:
+5. std::lock_guard和std::unique_lock有什么区别? 各有什么使用场景?(10分)
+
+6. 什么是false sharing, 写一个简单的代码示例, 并提供解决方法(15分)
+
+7. 内存分配会成为多线程程序的性能瓶颈吗, 如果是, 写一个简单的代码示例, 并提供解决方法(20分)
+
+编程题:
+8. 以C++11标准库实现bounded blocking queue并测量其性能 (30分)
+*/
+
+
 void trathread_test()
 {
 //    p7_0();
