@@ -1,4 +1,5 @@
 #include "trathread.h"
+#include "Observer.h"
 ///* ***************************************** Thread Object **********************
 //Create thread
 //There are two styles to create a thread in OOP language.
@@ -1092,7 +1093,7 @@ And we can use mutex + condition_variable to implement other advanced synchroniz
 //*/
 //
 //
-///*
+/*
 What is Thread Safety?
 A class is thread-safe if it behaves correctly when accessed from multiple threads, regardless of the scheduling or interleaving of the execution of those threads by the runtime environment.
 thread-safe classes encapsulate any needed synchronization so that clients need not provide their own.
@@ -1141,7 +1142,10 @@ class Observable;
 class Foo : public Observer {
 public:
     explicit Foo(Observable* s) {
-        s->register(this); // BAD: may be notify before construction finish
+        s->__register(this); // BAD: may be notify before construction finish
+    }
+    Foo() = default;
+    virtual void update() override {
     }
 };
 
@@ -1152,17 +1156,19 @@ don't use naked pointer to handle dynamic allocated thread-safe object, use smar
 destructor doesn't need to be protected by it's member mutex
 */
 
-class Foo;
 
-Foo* ins = new Foo;
-
-std::thread tr1([&]() {
-    delete ins;
-});
-
-std::thread tr2([&]() {
-    delete ins;
-});
+void p50()
+{
+    Foo* ins = new Foo;
+    
+    std::thread tr1([&]() {
+        delete ins;
+    });
+    
+    std::thread tr2([&]() {
+        delete ins;
+    });
+}
 
 // BAD: double free
 
@@ -1174,13 +1180,19 @@ if only contains mutex, don't provide copy/move constructor until you really nee
 */
 
 // use c++11 delegation constructor if your data member don't have default constructor
-class Counter {
+class Counter4 {
+public:
     std::mutex m_mtx;
     int m_count = 0;
-    Counter(const Counter& that, const std::lock_guard<std::mutex>&): m_count(that.m_count) {}
+    //Counter4(const Counter4& that, const std::lock_guard<std::mutex>&): m_count(that.m_count) {}
+    Counter4(const Counter4& that, std::lock_guard<std::mutex>&): m_count(that.m_count) {}
 public:
-    Counter(const Counter& that): Counter(that, std::lock_guard<std::mutex>(that.m_mtx)) {}
-}
+    //Counter4(const Counter4& that): Counter4(that, std::lock_guard<std::mutex>(that.m_mtx)) {}
+    Counter4(Counter4& that) {
+        std::lock_guard<std::mutex> m(that.m_mtx);
+        Counter4(that, m);
+    }
+};
 
 /*
 Thread-safe assignment and swap:
@@ -1188,7 +1200,7 @@ Thread-safe assignment and swap:
 if a class contains condition variables, it should not provide assignment operator or swap.
 if only contains mutex, don't provide assignment operator and swap until you really need it:
 */
-void swap(Counter& lhs, Counter& rhs) {
+void swap(Counter4& lhs, Counter4& rhs) {
     if (&lhs == &rhs) {
         return;
     }
@@ -1205,7 +1217,7 @@ const methods still need to be protected by mutex for other synchronization tool
 
 But lock is a non-const method, so we need to declare member mutex as mutable:
 */
-class Counter {
+class Counter5 {
     mutable std::mutex m_mutex;
     int m_count = 0;
     void add() {
@@ -1224,7 +1236,7 @@ mutable member should be thread-safe:
 
 If you want a member to be mutable, it should be thread safe.
 */
-class Counter {
+class Counter6 {
     mutable std::mutex m_mutex; // ok, mutex is already thread safe
     mutable std::atomic<int> m_called_count; // ok, atomic already is thread safe
     mutable std::string m_last_error; // no, std::string is not thread safe, but ok if you protected it by m_mutex
@@ -1249,13 +1261,16 @@ Smart Pointer
 It's not easy to delete a pointer which may reference in different thread. we can use smart pointer like boost::shared_ptr to handle it.
 Reference counter of shared pointer is atomically, so copy and reset a boost::shared_ptr is thread safe.
 */
-std::shared_ptr<int> the_answer = std::make_shared<int>(42);
-std::thread tr([the_answer]() {
-    std::shared_ptr<int> copy = the_answer; //OK: copy is safe
-    assert(*copy == 42);
-});
-tr.join();
-assert(*the_answer == 42);
+void p87()
+{
+    std::shared_ptr<int> the_answer = std::make_shared<int>(42);
+    std::thread tr([the_answer]() {
+        std::shared_ptr<int> copy = the_answer; //OK: copy is safe
+        assert(*copy == 42);
+    });
+    tr.join();
+    assert(*the_answer == 42);
+}
 
 
 /*
@@ -1265,13 +1280,16 @@ In future, boost::atomic_shared_pointer and c++20 std::atomic<std::shared_ptr<T>
 
 Remember, only "control block" of shared_ptr is thread safe, associated data is not!
 */
-std::shared_ptr<int> the_answer;
-std::thread tr([&the_answer]() {
-    the_answer = std::make_shared<int>(42); // BUG: assign is not safe
-});
-the_answer = std::make_shared<int>(233);
-tr.join();
-assert(*the_answer == 42); // Undefined!
+void p90()
+{
+    std::shared_ptr<int> the_answer;
+    std::thread tr([&the_answer]() {
+        the_answer = std::make_shared<int>(42); // BUG: assign is not safe
+    });
+    the_answer = std::make_shared<int>(233);
+    tr.join();
+    assert(*the_answer == 42); // Undefined!
+}
 
 
 /*
@@ -1312,7 +1330,7 @@ struct Answer {
 
 thread_local Answer the_answer;
 
-int main() { 
+int p91() { 
     std::cout << "main thread " << std::this_thread::get_id() << std::endl;
     std::thread tr([]() { 
         std::cout << "worker thread " << std::this_thread::get_id() << std::endl;
@@ -1330,10 +1348,13 @@ You need to call reset before use it in each thread and the pointed object will 
 */
 #include <boost/thread/tss.hpp>
 
-static boost::thread_specific_ptr<Answer> the_answer;
-
-if (!the_answer.get()) {
-    the_answer.reset(new Answer());
+void p92()
+{
+    static boost::thread_specific_ptr<Answer> the_answer;
+    
+    if (!the_answer.get()) {
+        the_answer.reset(new Answer());
+    }
 }
 
 
@@ -1343,55 +1364,245 @@ False sharing occurs when threads on different processors modify variables that 
 
 Thread-local storage or local variables can be ruled out as sources of false sharing.
 
-In following case, Foo::a and Foo::b will false sharing, tr1's i and tr2's i will false sharing.
+In following case, a and b will false sharing, tr1's i and tr2's i will false sharing.
 */
-struct Foo {
+void printTime(struct timespec start, const char *info)
+{
+    struct timespec finish;
+    double elapsed;
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = (finish.tv_sec - start.tv_sec);
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+    cout << info << " time cost :" << elapsed << endl;
+}
+int p93(int64_t &a, int64_t &b)
+{
+    struct timespec start;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+	auto fa = [](int64_t &c) { 
+        const int64_t n = 1e8;
+        for (int64_t i = 0; i < n; ++i) {
+            c++;
+        }
+	};
+	std::thread thread1(fa, std::ref(a));
+    thread1.join();
+    printTime(start, "change  a.");
+
+    clock_gettime(CLOCK_MONOTONIC, &start);
+	std::thread thread2(fa, std::ref(b));
+    thread2.join();
+    printTime(start, "change  b.");
+
+    clock_gettime(CLOCK_MONOTONIC, &start);
+	std::thread thread4(fa, std::ref(a));
+	std::thread thread3(fa, std::ref(b));
+    thread3.join();
+    thread4.join();
+    printTime(start, "change ab.");
+    return 0;
+}
+int false_sharing()
+{
+    int64_t a[2] = {0};
+    p93(a[0], a[1]);
+    cout << "After fix" << endl;
+    int64_t b[64 / sizeof(int64_t)] = {0};
+    p93(b[0], b[64 / sizeof(int64_t) - 1]);
+    return 0;
+}
+//change  a. time cost :0.251094
+//change  b. time cost :0.247693
+//change ab. time cost :0.538793
+//After fix
+//change  a. time cost :0.249504
+//change  b. time cost :0.249257
+//change ab. time cost :0.256371
+
+
+
+
+/*
+We can find cache line size from /sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size, example 64 byte, then we can use `__declspec (align(64))` to fix this:
+*/
+struct Foo3 {
+//    __declspec (align(64)) int32_t a = 0;
+//    __declspec (align(64)) int32_t b = 0;
     int32_t a = 0;
     int32_t b = 0;
 };
 
-int main() {
+int p94() {
     const int32_t n = 1000 * 1000 * 1000;
-    Foo foo;
+    Foo3 foo3;
     std::thread tr1([&]() {
+        //for (__declspec (align(64)) int32_t i = 0; i < n; ++i) {
         for (int32_t i = 0; i < n; ++i) {
-            foo.a++;
+            foo3.a++;
         }
     });
     std::thread tr2([&]() {
+        //for (__declspec (align(64)) int32_t i = 0; i < n; ++i) {
         for (int32_t i = 0; i < n; ++i) {
-            foo.b++;
+            foo3.b++;
         }
     });
     tr1.join();
     tr2.join();
     return 0;
 }
+#include<malloc.h>
+void stdmalloc (char **p, int n)
+{ 
+    for (int i = 0; i < n; ++i) {
+        p[i] = (char*)malloc(sizeof(char));
+    }
+};
+void printTime2(struct timespec start, const char *info)
+{
+    struct timespec finish;
+    double elapsed;
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = (finish.tv_sec - start.tv_sec);
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+    cout << info << elapsed << " s" << endl;
+}
+const int N = 1e7;
+char *p1[N];
+char *p2[N];
+int malloc_test0()
+{
+    struct timespec start;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    std::thread thread1(stdmalloc, p1, N);
+    thread1.join();
+    printTime2(start, "thread1   new.");
+    for (int i = 0; i < N; ++i) {
+        free(p1[i]);
+        p1[i] = NULL;
+    }
 
+//    clock_gettime(CLOCK_MONOTONIC, &start);
+//	std::thread thread2(stdmalloc, p2, N);
+//    thread2.join();
+//    printTime2(start, "thread2   new.");
+//    for (int i = 0; i < N; ++i) {
+//        delete p2[i];
+//        p2[i] = NULL;
+//    }
 
-/*
-We can find cache line size from /sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size, example 64 byte, then we can use `__declspec (align(64))` to fix this:
-*/
-struct Foo {
-    __declspec (align(64)) int32_t a = 0;
-    __declspec (align(64)) int32_t b = 0;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+	std::thread thread3(stdmalloc, p1, N);
+	std::thread thread4(stdmalloc, p2, N);
+    thread3.join();
+    thread4.join();
+    printTime2(start, "thread3/4 new.");
+    for (int i = 0; i < N; ++i) {
+        delete p1[i];
+        p1[i] = NULL;
+        delete p2[i];
+        p2[i] = NULL;
+    }
+    return 0;
+}
+
+struct Strarg {
+    char **p;
+    int len;
 };
 
-int main() {
-    const int32_t n = 1000 * 1000 * 1000;
-    Foo foo;
-    std::thread tr1([&]() {
-        for (__declspec (align(64)) int32_t i = 0; i < n; ++i) {
-            foo.a++;
-        }
-    });
-    std::thread tr2([&]() {
-        for (__declspec (align(64)) int32_t i = 0; i < n; ++i) {
-            foo.b++;
-        }
-    });
-    tr1.join();
-    tr2.join();
+static void *threadf(void *arg)       
+{
+    Strarg *s = (Strarg*)arg;
+    for (int i = 0; i < s->len; ++i) {
+        s->p[i] = (char*)malloc(sizeof(char));
+    }
+    pthread_exit(NULL);
+}
+
+int malloc_test()
+{
+
+    pthread_t threads[2];
+    memset(&threads, 0, sizeof(threads));
+    Strarg s1 = {p1, N};
+    struct timespec start;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    if (pthread_create(&threads[0], NULL, threadf, (void*)&s1) == -1) {
+        printf("thread1 create falied\n");
+        exit(-1);
+    }
+    pthread_join(threads[0],NULL);
+    printTime2(start, "thread1   malloc.");
+    for (int i = 0; i < N; ++i) {
+        free(s1.p[i]);
+        s1.p[i] = NULL;
+    }
+
+    memset(&threads, 0, sizeof(threads));
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    if (pthread_create(&threads[0], NULL, threadf, (void*)&s1) == -1) {
+        printf("threads1 create falied\n");
+        exit(-1);
+    }
+    Strarg s2 = {p2, N};
+    if (pthread_create(&threads[1], NULL, threadf, (void*)&s2) == -1) {
+        printf("threads1 create falied\n");
+        exit(-1);
+    }
+    pthread_join(threads[0],NULL);
+    pthread_join(threads[1],NULL);
+    printTime2(start, "thread0/1 malloc.");
+    for (int i = 0; i < N; ++i) {
+        free(s1.p[i]);
+        s1.p[i] = NULL;
+        free(s2.p[i]);
+        s2.p[i] = NULL;
+    }
+    return 0;
+}
+
+extern "C"
+{
+#include "jemalloc/jemalloc.h"
+}
+void jemalloc(char **p, int n)
+{
+    for (int i = 0; i < n; ++i) {
+        p[i] = (char*)mallocx(sizeof(char), 0);
+    }
+}
+
+int jemalloc_test()
+{
+    struct timespec start;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    std::thread thread1(jemalloc, p1, N);
+    thread1.join();
+    printTime2(start, "thread1   mallocx.");
+    for (int i = 0; i < N; ++i) {
+        p1[i] = NULL;
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    std::thread thread3(jemalloc, p1, N);
+    std::thread thread4(jemalloc, p2, N);
+    thread3.join();
+    thread4.join();
+    printTime2(start, "thread3/4 mallocx.");
+    for (int i = 0; i < N; ++i) {
+        p1[i] = NULL;
+        p2[i] = NULL;
+    }
+    return 0;
+}
+
+int malloc_test2()
+{
+    printf("\nmalloc_test\n");
+    malloc_test();
+    printf("\njemalloc_test\n");
+    jemalloc_test();
     return 0;
 }
 
@@ -1406,8 +1617,9 @@ Each atomic operation is indivisible with regards to any other atomic operation 
 
 Atomic objects are free of data races.
 */
-class Counter : public boost::noncopyable {
-    std::atomic<int> m_count = 0;
+class Counter7 : public boost::noncopyable {
+    //std::atomic<int> m_count = 0;
+    std::atomic<int> m_count;
 public:
     void add(int value) {
         m_count.fetch_add(value);
@@ -1415,7 +1627,7 @@ public:
     int value() {
         return m_count.load();
     }
-}
+};
 
 
 /*
@@ -1427,20 +1639,23 @@ The sizeof T decides whether std::atomic<T> is lock free:
 */
 
 
-struct Counter {
+struct Counter8 {
     int64_t count = 0;
 };
 
-struct Foo {
+struct Foo4 {
     int64_t a = 0;
     int64_t b = 0;
 };
 
-std::atomic<Counter> c;
-assert(c.is_lock_free());
-
-std::atomic<Foo> f;
-assert(!f.is_lock_free());
+void p95()
+{
+    std::atomic<Counter8> c;
+//    assert(c.is_lock_free());
+    
+    std::atomic<Foo4> f;
+//    assert(!f.is_lock_free());
+}
 
 
 /*
@@ -1451,11 +1666,6 @@ Active Object
 Singleton
 Thread-safe singleton is hard to implement before C++11. Fortunately, in C++ 11, compiler ensures that concurrent execution shall wait for static local variable being initialized.
 */
-static Singleton& instance() { 
-    static Singleton s_instance;
-    return s_instance;
-}
-
 
 /*If you want pointer, std::call_once can help:
 */
@@ -1471,41 +1681,80 @@ private:
     static void init() {
         sp_instance = new Singleton;
     }
+};
+static Singleton& instance() { 
+    static Singleton s_instance;
+    return s_instance;
 }
 
 
+
+
+std::atomic<int> foo (0);
+
+void set_foo(int x) {
+  foo.store(x,std::memory_order_relaxed);     // set value atomically
+}
+
+void print_foo() {
+  int x;
+  do {
+    x = foo.load(std::memory_order_relaxed);  // get value atomically
+  } while (x==0);
+  std::cout << "foo: " << x << '\n';
+}
+
+static int test()
+{
+  std::thread first (print_foo);
+  std::thread second (set_foo,10);
+  first.join();
+  second.join();
+  return 0;
+}
 
 /*
 For double-check locking, we have std::atomic in C++11, it can acts as a memory barrier:
 */
-class Singleton {
-public:
-    static Singleton* instance() { 
-        Singleton* tmp = asp_instance.load();
-        if (!tmp) {
-            std::lock_guard<std::mutex> lk(s_mutex);
-            tmp = instance.load();
-            if (!tmp) {
-                tmp = new Singleton;
-                asp_instance.store(tmp);
-            }
-        }
-    }
-    static std::atomic<Singleton*> asp_instance;
-    static std::mutex s_mutex;
-}
-
+//class Singleton2 {
+//public:
+//    static Singleton2* instance() { 
+//        Singleton2* tmp = asp_instance->load(std::memory_order_relaxed);
+//        //Singleton2* tmp = asp_instance.load();
+//        if (!tmp) {
+//            std::lock_guard<std::mutex> lk(s_mutex);
+//            tmp = instance.load();
+//            if (!tmp) {
+//                tmp = new Singleton2;
+//                asp_instance.store(tmp, std::memory_order_relaxed);
+//            }
+//        }
+//        return tmp;
+//    }
+//    static std::atomic<Singleton2*> asp_instance;
+//    static std::mutex s_mutex;
+//};
 
 /*
 Observer
 Thread-safe Observer pattern is important in "future continuation" or "future watcher":
 */
-boost::future<int> f = boost::async([](){ return 42;});
-boost::future<std::string> fs = f.then([](boost::future<int> prev) {
-    int the_answer = prev.get();
-    return std::to_string(the_answer);
-});
-assert(fs.get() == "42");
+//#include <boost/assign.hpp>
+//#include <boost/typeof/typeof.hpp>
+//#include <boost/thread.hpp>
+//#include <boost/array.hpp>
+//#include <boost/foreach.hpp>
+//#include <boost/ref.hpp>
+//int p96() {
+//    //boost::future<int> f = boost::async([](){ return 42;});
+//    //boost::future<std::string> fs = f.then([](boost::future<int> prev) {
+//    boost::unique_future<int> f = boost::async([](){ return 42;});
+//    boost::unique_future<std::string> fs = f.then([](boost::unique_future<int> prev) {
+//        int the_answer = prev.get();
+//        return std::to_string(the_answer);
+//    });
+//    assert(fs.get() == "42");
+//}
 
 
 
@@ -1517,24 +1766,24 @@ copy all observer pointers and remove expired under lock guard when notify, so w
 call observer's notify method out of lock guard, so we can register new observer to observable during notification and notification won't block observable too much time.
 boost::future is an example registered shared_ptr; tpool::ObservableFutureTask is an example registered weak_ptr.
 */
-void Observable::notify() {
-    std::vector<std::weak_ptr<Observer>>> to_notify;
-    {
-        std::lock_guard<std::mutex> lk(m_mutex);
-        for (const auto& wp : m_observers) {
-            if (!wp.expired()) {
-                to_notify.push_back(wp);
-            }
-        }
-        m_observers = to_notify;
-    }
-    for (const auto& wp : to_notify) {
-        auto sp = wp.lock();
-        if (sp) {
-            sp->notify();
-        }
-    }
-}
+//void Observable::notify() {
+//    std::vector<std::weak_ptr<Observer>>> to_notify;
+//    {
+//        std::lock_guard<std::mutex> lk(m_mutex);
+//        for (const auto& wp : m_observers) {
+//            if (!wp.expired()) {
+//                to_notify.push_back(wp);
+//            }
+//        }
+//        m_observers = to_notify;
+//    }
+//    for (const auto& wp : to_notify) {
+//        auto sp = wp.lock();
+//        if (sp) {
+//            sp->notify();
+//        }
+//    }
+//}
 
 
 
@@ -1546,7 +1795,7 @@ In some case, it can help us handle some thread un-safe modules that we can not 
 
 Take counter as a simple example:
 */
-class Counter {
+class Counter9 {
     int m_count = 0;
 public:
     int add(int value) { 
@@ -1559,16 +1808,16 @@ It's unsafe for concurrent access, we can apply active object pattern for it:
 
 CounterProxy can concurrency access now.
 */
-class CounterProxy {
-    Counter m_counter;
-    boost::serial_executor m_executor;
-public:
-    boost::future<int> add(int value) {
-        return boost::async(m_executor, [=] {
-            return this->m_counter.add(value);
-        });
-    }
-};
+//Class CounterProxy {
+//    Counter9 m_counter;
+//    boost::serial_executor m_executor;
+//Public:
+//    boost::future<int> add(int value) {
+//        return boost::async(m_executor, [=] {
+//            return this->m_counter.add(value);
+//        });
+//    }
+//};
 
 
 
@@ -1592,21 +1841,69 @@ Brian Goetz, Java Concurrency in Practice, 2006
 Atul S. Khot, Concurrent Patterns and Best Practices, 2018
 */
 
+
+void future_test()
+{
+    //通过async来获取异步操作结果
+    std::future<int>  result = std::async([](){ 
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        return 8; 
+    });
+    
+    std::cout << "the future result : " << result.get() << std::endl;
+    std::cout << "the future status : " << result.valid() << std::endl;
+    try
+    {
+        result.wait();  //或者 result.get() ,会异常
+      //因此std::future只能用于单线程中调用 ，多线程调用使用std::share_future();
+    }
+    catch (...)
+    {
+        std::cout << "get error....\n ";
+    }
+}
+
+
+#include <chrono>               // std::chrono::milliseconds
+// a non-optimized way of checking for prime numbers:
+bool is_prime(int x)
+{
+    for (int i = 2; i < x; ++i)
+        if (x % i == 0)
+            return false;
+    return true;
+}
+void future_test2()
+{
+    // call function asynchronously:
+    std::future < bool > fut = std::async(is_prime, 444444443);
+    std::cout << "std::async\n";
+
+    // do something while waiting for function to set future:
+    std::cout << "checking, please wait\n";
+    //std::chrono::milliseconds span(100);
+    //while (fut.wait_for(span) == std::future_status::timeout)
+    //    std::cout << '.';
+
+    bool x = fut.get();         // retrieve return value
+
+    std::cout << "\n444444443 " << (x ? "is" : "is not") << " prime.\n";
+}
 /*
 选择题
-1. 对于一次性异步计算的结果, 以下哪个同步工具比较合适:(单选, 5分)
+1. 对于一次性异步计算的结果, 以下哪个同步工具比较合适:(单选, 5分) C
 A. blocking queue, B. latch, C. future, D. mutex
 
-2. 对于生产者消费者问题, 以下哪个同步工具比较合适:(单选, 5分)
+2. 对于生产者消费者问题, 以下哪个同步工具比较合适:(单选, 5分) D
 A. blocking queue, B. latch, C. future, D. mutex
 
-3. 以下哪个不是线程安全的实现方法:(单选, 5分)
+3. 以下哪个不是线程安全的实现方法:(单选, 5分) A
 A. static local variable
 B. thread local sotrage
 C. mutual exclusion
 D. stateless implementation
 
-4. 以下的说法, 正确的是:(多选, 10分, 错选得0分, 少选得5分)
+4. 以下的说法, 正确的是:(多选, 10分, 错选得0分, 少选得5分) E
 A. boost::future::then是线程安全observer模式的体现
 B. 为了实现线程安全c++类, mutable 成员变量本身应当是线程安全的
 C. 跨线程引用的对象, 可以使用智能指针管理其生命周期
@@ -1615,8 +1912,15 @@ E. std::thread提供了cancel机制
 
 问答题:
 5. std::lock_guard和std::unique_lock有什么区别? 各有什么使用场景?(10分)
+    lock_guard使用起来比较简单，除了构造函数外没有其他member function，在整个区域都有效。
+    unique_guard除了lock_guard的功能外，提供了更多的member_function，相对来说更灵活一些。
+    unique_guard的最有用的一组函数为： lock, unlock, try_lock, try_lock_for, try_lock_until
+    通过这些函数，可以灵活的控制锁的范围和加锁的等待时间，但是资源的消耗要大一些。
 
 6. 什么是false sharing, 写一个简单的代码示例, 并提供解决方法(15分)
+当多线程修改互相独立的变量时，如果这些变量共享同一个缓存行，就会无意中影响彼此的性能，这就是伪共享。
+示例代码的解决方法是使多线程访问的变量无法在同一个缓存行容纳。
+
 
 7. 内存分配会成为多线程程序的性能瓶颈吗, 如果是, 写一个简单的代码示例, 并提供解决方法(20分)
 
@@ -1635,5 +1939,9 @@ void trathread_test()
 //    p16();
 //    px1();
 //    px3();
-    p24();
+//    p24();
+//    false_sharing();
+    malloc_test2();
+//    future_test();
+//    future_test2();
 }

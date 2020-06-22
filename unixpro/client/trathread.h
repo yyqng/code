@@ -18,6 +18,9 @@
 #include <boost/thread.hpp>
 #include <exception>
 #include <condition_variable>
+#include <atomic>
+#include <future>
+#include <time.h>
 
 using namespace std;
 
