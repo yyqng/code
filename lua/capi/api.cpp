@@ -1,4 +1,5 @@
 #include "color.h"
+#include "lauxlib.h"
 
 #define LUA_POP(L,n) lua_settop(L, -(n)-1)
 void stackDumpTest(void){

@@ -410,57 +410,33 @@ void p24()
 
 	auto f1 = [&]() {
 		// lock condition than modify
+        printf("thread lock\n");
 		std::lock_guard<std::mutex> lk(mtx);
 		the_answer = 42;
 		the_answer_is_ready = true;
 		// notify waiters after condition modified
-        printf("thread1 cond.notify_all\n");
+        printf("thread cond.notify_all\n");
 		cond.notify_all();
 	};
 	std::thread tr1(f1);
 
 	std::unique_lock<std::mutex> ulk(mtx);
-	auto f2 = [&]() {
-	    while (!the_answer_is_ready) { // keep waiting when condition is not what we want
-	    	// wait contains three step: 
-	    	// 1. unlock ulk
-	    	// 2. hang this thread until being notified
-	    	// 3. relock ulk after notified
-            printf("thread2 waiting\n");
-	    	cond.wait(ulk);
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            printf("thread2 recived\n");
-	        assert(the_answer_is_ready == true);
-	        assert(the_answer == 42);
-		    cond.notify_all();
-	    }
-        //printf("thread2 is waiting\n");
-		//cond.wait(ulk);
-		//// lock condition than modify
-		//std::lock_guard<std::mutex> lk(mtx);
-		//the_answer = 42;
-		//the_answer_is_ready = true;
-		//// notify waiters after condition modified
-        //printf("thread2 cond.notify_all\n");
-		//cond.notify_all();
-	};
-	std::thread tr2(f2);
-    printf("main thread sleep_for 1s\n");
     std::this_thread::sleep_for(std::chrono::seconds(1));
 	while (!the_answer_is_ready) { // keep waiting when condition is not what we want
 		// wait contains three step: 
 		// 1. unlock ulk
 		// 2. hang this thread until being notified
 		// 3. relock ulk after notified
-        printf("waiting\n");
+        printf("main thread waiting\n");
 		cond.wait(ulk);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        printf("recived\n");
+        printf("main thread recived\n");
 	}
 	assert(the_answer_is_ready == true);
 	assert(the_answer == 42);
 	tr1.join();
-	tr2.join();
+//	tr2.join();
+//	std::thread tr3(f1);
+//	tr3.join();
 }
 
 
@@ -495,66 +471,95 @@ And we can use mutex + condition_variable to implement other advanced synchroniz
 //Semaphore
 //A (Counting) Semaphore is a synchronization tool that can control access shared resources.
 //*/
-//class semaphore : public boost::noncopyable {
-//public:
-//    semaphore(unsigned int limit, unisgned int count);
+#include <semaphore.h>
+class semaphore : public boost::noncopyable {
+public:
+    semaphore(unsigned int limit, unsigned int count) {
+        sem_init(&m_sem, 0, limit);
+        for (unsigned int i = 0; i < count; ++i) {
+            sem_wait(&m_sem);
+        }
+    }
 //    void acquire(unsigned int diff = 1);
 //    void release(unsigned int diff = 1);
-//};
-//
-///*
-//Binary semaphore sometimes use as mutex + condition_variable:
-//*/
-//void p28()
-//{
-//	int the_answer = -1;
-//	semaphore sem(1, 1);
-//	std::thread tr([&]() {
-//		the_answer = 42;
-//		sem.release();
-//	});
-//	sem.acquire();
-//	assert(42 == the_answer);
-//}
-//
+    void acquire(unsigned int diff = 1) {
+        sem_wait(&m_sem);
+    }
+    void release(unsigned int diff = 1) {
+        sem_post(&m_sem);
+    }
+    ~semaphore() {
+        sem_destroy(&m_sem);
+    }
+    sem_t m_sem;
+};
+
+/*
+Binary semaphore sometimes use as mutex + condition_variable:
+*/
+void p28()
+{
+	int the_answer = -1;
+	semaphore sem(1, 1);
+	std::thread tr([&]() {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+		the_answer = 42;
+        printf("in thread before sem.release\n");
+		sem.release();
+        printf("in thread after sem.release\n");
+	});
+    printf("in main before sem.acquire\n");
+	sem.acquire();
+    printf("in main after sem.acquire\n");
+	assert(42 == the_answer);
+    tr.join();
+}
+
 ///*
 //producer-consumer problem can solve using semaphore:
 //*/
-//void p29()
-//{
-//	static const int N = 100;                       
-//	std::mutex mtx;                                   
-//	semaphore sem_slot(N, 0);                     
-//	semaphore sem_product(N, N);                  
-//	class production;
-//	void producer() {
-//		production item;
-//		while (true) {
-//			item = produce_item();
-//			sem_slot.acquire();
-//			{
-//				std::lock_guard<std::mutex> lk(mtx);
-//				insert_item(item);  
-//			}                              
-//			sem_product.release();    
-//		}    
-//	}
-//	void consumer() {
-//		production item;
-//		while (true) {
-//			sem_product.acquire();
-//			{
-//				std::lock_guard<std::mutex> lk(mtx);
-//				item = remove_item();  
-//			}                          
-//			sem_slot.release();         
-//			consume_item(item);                       
-//		}
-//	}
-//}
-//
-//
-//
+int production = 0;
+void producer(semaphore &sem_product, semaphore &sem_slot, std::mutex &mtx) {
+	while (true) {
+		sem_slot.acquire();
+		{
+			std::lock_guard<std::mutex> lk(mtx);
+            printf("producer: production = %d.\n", production);
+            ++production;
+		}                              
+		sem_product.release();
+	}    
+}
+void consumer(semaphore &sem_product, semaphore &sem_slot, std::mutex &mtx) {
+	while (true) {
+		sem_product.acquire();
+		{
+			std::lock_guard<std::mutex> lk(mtx);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            printf("consumer ------: production = %d.\n", production);
+            --production;
+		}                          
+		sem_slot.release();         
+	}
+}
+void p29()
+{
+	static const int N = 5;                       
+	std::mutex mtx;                                   
+	semaphore sem_slot(N, 0);                     
+	semaphore sem_product(N, N);                  
+	std::thread tr1([&]() {
+        producer(sem_product, sem_slot, mtx);
+	});
+	std::thread tr2([&]() {
+        consumer(sem_product, sem_slot, mtx);
+	});
+    tr1.join();
+    tr2.join();
+}
+
+
+
 ///*
 //It can also apply to limit the concurrent access to one resources, e.g. limit connection to server.
 //*/
@@ -589,73 +594,59 @@ And we can use mutex + condition_variable to implement other advanced synchroniz
 ///*
 //Future/Promise
 //What if it throws an exception while calculating the_answer?
-//*/
-//void p32()
-//{
-//	int the_answer = -1;
-//	bool the_answer_is_ready = false; // the condition we waiting for
-//	std::mutex mtx; // protect the_answer and the_answer_is_ready
-//	std::condition_variable cond;
-//
-//	std::thread tr([&]() {
-//		// lock condition than modify
-//		std::lock_guard<std::mutex> lk;
-//		the_answer = 42;
-//		the_answer_is_ready = true;
-//		// notify waiters after condition modified
-//		cond.notify_all();
-//	});
-//
-//	std::unique_lock<std::mutex> ulk(mtx);
-//	while (!the_answer_is_ready) { // keep waiting when condition is not what we want
-//		// wait contains three step: 
-//		// 1. unlock ulk
-//		// 2. hang this thread until being notified
-//		// 3. relock ulk after notified
-//		cond.wait(ulk);
-//	}
-//	assert(the_answer_is_ready == true);
-//	assert(the_answer == 42);
-//	tr.join();
-//}
-//
-//
-//
-//
-///*
+
 //In previous example, we declared value(the_answer), state(the_answer_is_ready), mutex(mtx), condition variable(cond), thread(tr), and maybe need handle exception. This complexity usage pattern is hard for beginner.
 //
 //So people provide future/promise:
 //*/
 //
-//void p33()
-//{
-//	boost::promise<int> pr;
-//	boost::future<int> fu = pr.get_future();
-//	boost::thread tr([](boost::promise<int>& ret) {
-//		ret.set_value(42);
-//	}, boost::ref(pr));
-//	tr.detach();
-//	assert(fu.get() == 42);
-//}
-//
-//
-//
-//
+#include <boost/thread/future.hpp>
+//#include <boost/thread/promise.hpp>
+
+void p33a()
+{
+    std::promise<int> pr;
+    std::future<int> fu = pr.get_future();
+    auto f = [](std::promise<int>& pr) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        printf("p33a: pr.set_value(42)\n");
+        pr.set_value(42);
+    };
+    std::thread tr(f, std::ref(pr));
+    assert(fu.get() == 42);
+}
+
+void p33b()
+{
+	boost::promise<int> pr;
+	boost::unique_future<int> fu = pr.get_future();
+	auto f = [](boost::promise<int>& pr) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        printf("p33b: pr.set_value(42)\n");
+		pr.set_value(42);
+	};
+	boost::thread tr(f, boost::ref(pr));
+    printf("p33b: fu.get() = %d\n", fu.get());
+	assert(fu.get() == 42);
+}
+
+
+
+
 ///*
 //Further more, we don't want to declare promise and thread, we can use free function async to simplify it:
 //Each async will launch a new thread.
 //*/
 //
-//void p34()
-//{
-//	std::future<int> fu = std::async([](){ return 42;});
-//	assert(fu.get() == 42);
-//}
-//
-//
-//
-//
+void p34()
+{
+	std::future<int> fu = std::async([](){ return 42;});
+	assert(fu.get() == 42);
+}
+
+
+
+
 ///*
 //Future/Promise are proxy for async result
 //promise usually has the following interface:
@@ -1940,8 +1931,13 @@ void trathread_test()
 //    px1();
 //    px3();
 //    p24();
+//    p28();
+//    p29();
+//    p33a();
+//    p33b();
+    p34();
 //    false_sharing();
-    malloc_test2();
+//    malloc_test2();
 //    future_test();
 //    future_test2();
 }
