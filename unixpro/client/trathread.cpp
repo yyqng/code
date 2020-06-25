@@ -640,96 +640,107 @@ void p33b()
 //
 void p34()
 {
-	std::future<int> fu = std::async([](){ return 42;});
+	auto f = []() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        return 42;
+	};
+	std::future<int> fu = std::async(f);
 	assert(fu.get() == 42);
 }
 
 
 
 
-///*
-//Future/Promise are proxy for async result
-//promise usually has the following interface:
-//*/
-//template<typename T>
-//class promise : boost::noncopyable{
-//public:
-//    promise();
-//    ~promise();
-//    future<T> get_future();
-//    void set_value(const T& value);
+/*
+Future/Promise are proxy for async result
+promise usually has the following interface:
+*/
+#include <exception>
+template<typename T>
+class promise : boost::noncopyable{
+public:
+    promise();
+    ~promise();
+    future<T> get_future();
+    void set_value(const T& value);
 //    void set_exception(boost::exceptional_ptr p);
-//};
-//
-///*
-//future usually has the following interface:
-//promise and future shared same internal state, which contains value, state, mutex condition variable and exception we talk before.
-//*/
-//template<typename T>
-//class future {
+    void set_exception();
+};
+
+/*
+future usually has the following interface:
+promise and future shared same internal state, which contains value, state, mutex condition variable and exception we talk before.
+*/
+template<typename T>
+class future {
 //     friend class promise<T>;
-//public:
-//     T get();
-//     bool is_ready() const;
-//     bool has_exception() const;
-//     bool has_value() const;
-//     void wait() const;
-//};
-//
-///*
-//Future can be a default tool for one-time synchronization
-//Most case can solve by one future, if can't, use two futures!
-//Some libraries didn't provide future/promise, e.g. ancient java, tpool. But they also provide similar tool FutureTask, which can use in thread pool:
-//
-//If two futures still insufficient: Barrier, Latch or Blocking Queue
-//*/
-//void p37()
-//{
-//	tpool::LThreadPool& pool = tpool::GetThreadPool();
-//	tpool::FutureTask<int>::Ptr task = pool.AddFutureTask([](){ return 42;});
-//	assert(task.GetResult() == 42);
-//}
-//
-//
-//
-//
-///*
-//Barrier
-//A barrier is a synchronization point between multiple threads.
-//
-//The barrier is configured for a particular number of threads (n), and as threads reach the barrier they must wait until all n threads have arrived.
-//
-//Once the n-th thread has reached the barrier, all the waiting threads can proceed, and the barrier is reset.
-//*/
-//
-//void p38()
-//{
-//	int many_anwer[5];
-//	boost::barrier br(5+1); // thread number to rendezvous, add main thread here
-//
-//	for (int& answer: many_anwer) {
-//		boost::thread tr([&]() {
-//			answer = 42;
-//			br.wait();
-//		});
-//		tr.detach();
-//	}
-//	br.wait(); // threads finished after this wait
-//}
-//
-//
-//
-//
-///*
-//Latch
-//Latches are a thread co-ordination mechanism that allow one or more threads
-//to block until one or more threads have reached a point.
-//
-//boost provides barrier & latch, c++20 also;
-//tpool provides CyclicBarrier & CountDownLatch.
-//*/
-//
-//void p7()
+public:
+     T get();
+     bool is_ready() const;
+     bool has_exception() const;
+     bool has_value() const;
+     void wait() const;
+};
+
+/*
+Future can be a default tool for one-time synchronization
+Most case can solve by one future, if can't, use two futures!
+Some libraries didn't provide future/promise, e.g. ancient java, tpool. But they also provide similar tool FutureTask, which can use in thread pool:
+
+If two futures still insufficient: Barrier, Latch or Blocking Queue
+*/
+void p37()
+{
+    //tpool::LThreadPool& pool = tpool::GetThreadPool();
+    //tpool::FutureTask<int>::Ptr task = pool.AddFutureTask([](){ return 42;});
+    //assert(task.GetResult() == 42);
+}
+
+
+
+
+/*
+Barrier
+A barrier is a synchronization point between multiple threads.
+
+The barrier is configured for a particular number of threads (n), and as threads reach the barrier they must wait until all n threads have arrived.
+
+Once the n-th thread has reached the barrier, all the waiting threads can proceed, and the barrier is reset.
+*/
+
+void p38()
+{
+    const int N = 2;
+    int many_anwer[N];
+    boost::barrier br(N + 1); // thread number to rendezvous, add main thread here
+    for (int& answer: many_anwer) {
+        boost::thread tr([&]() {
+            answer = 42;
+            printf("answer in thread is %d\n", answer);
+            br.wait();
+        });
+        tr.detach();
+    }
+    br.wait(); // threads finished after this wait
+//    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    for (int& answer: many_anwer) {
+        printf("answer is %d\n", answer);
+    }
+}
+
+
+
+
+/*
+Latch
+Latches are a thread co-ordination mechanism that allow one or more threads
+to block until one or more threads have reached a point.
+
+boost provides barrier & latch, c++20 also;
+tpool provides CyclicBarrier & CountDownLatch.
+*/
+//#include <boost/thread/latch.hpp>
+//void p87()
 //{
 //	int many_anwer[5];
 //	boost::latch lt(5); // worker number to be cound down, no need main thread
@@ -745,31 +756,64 @@ void p34()
 //}
 //
 //
+//#include <memory>
+//#include <CTPL/ctpl.h>
+//int mytest(int argc, char **argv) {
 //
+//    ctpl::thread_pool outer_tp(100);
+//    ctpl::thread_pool inner_tp(5, 5000);
 //
+//    auto out_func = [&inner_tp](int outer_id, int outer_invoke_idx) {
+//        int num_batch = 20;
+//        auto latch_ = std::make_shared<boost::latch>(num_batch);
+//
+//        auto func = [latch_, outer_invoke_idx](int inner_id, int inner_invoke_idx) {
+//            try {
+//                std::cout << "outer: " << outer_invoke_idx << ", inner: " << inner_invoke_idx << endl;
+//            } catch (exception &ex) { cout << "error: " << ex.what() << endl; }
+//            latch_->count_down();
+//        };
+//
+//        for (int i = 0; i < num_batch; ++i) {
+//            inner_tp.push(func, i);
+//        }
+//
+//        latch_->wait_for(boost::chrono::milliseconds(1));
+//    };
+//
+//    for (int i = 0; i < 5000; ++i) outer_tp.push(out_func, i);
+//
+//    outer_tp.stop(true);
+//    inner_tp.stop(true);
+//    std::cout << "EXITING!!!" << std::endl;
+//    return 0;
+//}
+
+
+
 ///*
 //Blocking Queue
 //Blocking queue is simplest implementation of thread safe queue, blocking in pop if queue is empty.
 //
 //Please notice that size() and empty() are meaningless in multi-thread programming.
 //*/
-//template<typename T>
-//class blocking_queue : boost::noncopyable {
-//    std::queue<T> m_queue;
-//    std::condition_variable m_cond;
-//    mutable std::mutex m_mutex;
-//public:
-//    blocking_queue() {}
-//    void push(const T& val);
-//    void pop(T& val);
-//    bool try_pop(const T& val);
-//    size_t size() const;
-//    bool empty() const;
-//};
-//
-//
-//
-//
+template<typename T>
+class blocking_queue : boost::noncopyable {
+    std::queue<T> m_queue;
+    std::condition_variable m_cond;
+    mutable std::mutex m_mutex;
+public:
+    blocking_queue() {}
+    void push(const T& val);
+    void pop(T& val);
+    bool try_pop(const T& val);
+    size_t size() const;
+    bool empty() const;
+};
+
+
+
+
 ///*
 //Bounded Blocking Queue
 //Similar to blocking queue, but the size is limited, which means that push will also block if buffer is full.
@@ -794,6 +838,7 @@ void p34()
 //        consume_item(item);  
 //    }
 //});
+
 //
 //
 //
@@ -1666,6 +1711,8 @@ public:
         std::call_once(s_once_flag, &Singleton::init);
         return sp_instance;
     }
+    void instance_do_sth() { 
+    }
 private:
     static Singleton* sp_instance;
     static std::once_flag s_once_flag;
@@ -1684,19 +1731,22 @@ static Singleton& instance() {
 std::atomic<int> foo (0);
 
 void set_foo(int x) {
-  foo.store(x,std::memory_order_relaxed);     // set value atomically
+    foo.store(x,std::memory_order_relaxed);     // set value atomically
 }
 
 void print_foo() {
-  int x;
-  do {
-    x = foo.load(std::memory_order_relaxed);  // get value atomically
-  } while (x==0);
-  std::cout << "foo: " << x << '\n';
+    int x;
+    do {
+      x = foo.load(std::memory_order_relaxed);  // get value atomically
+    } while (x == 0);
+    std::cout << "foo: " << x << '\n';
 }
 
-static int test()
+int atomic_test()
 {
+  Singleton s = instance();
+  s.instance_do_sth();
+
   std::thread first (print_foo);
   std::thread second (set_foo,10);
   first.join();
@@ -1935,9 +1985,12 @@ void trathread_test()
 //    p29();
 //    p33a();
 //    p33b();
-    p34();
+//    p34();
+//    p38(); //probelm
+    p87();
 //    false_sharing();
 //    malloc_test2();
 //    future_test();
 //    future_test2();
+//    atomic_test();
 }
