@@ -57,7 +57,7 @@ int __myqueue_test(int thread_count, int qsize, int op_num)
     return 0;
 }
 
-int myqueue_test()
+void myqueue_test()
 {
     int thread_count = 1e4; 
     int qsize = 1e4;

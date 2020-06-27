@@ -1,5 +1,5 @@
 TOP_DIR = .
-TARGET = $(TOP_DIR)/test
+TARGET = $(TOP_DIR)/main.out
 
 include $(TOP_DIR)/vars.mk
 include $(TOP_DIR)/rules.mk

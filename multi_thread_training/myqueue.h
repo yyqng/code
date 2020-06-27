@@ -1,23 +1,11 @@
 #ifndef __Myqueue_H
 #define __Myqueue_H
 #include <iostream>
-#include <fstream>
-#include <string>
 #include <thread>
-#include <chrono>
-#include <cstring>
-#include <pthread.h>
+#include <list>
 #include <mutex> 
-#include <assert.h>
-#include <boost/thread.hpp>
-#include <exception>
 #include <condition_variable>
-#include <atomic>
-#include <future>
 #include <time.h>
-#include <queue>
-#include <boost/circular_buffer.hpp>
-#include "tools.h"
 #include "ring_buffer.h"
 
 using namespace std;
@@ -48,6 +36,6 @@ private:
     std::condition_variable m_readable;
 };
 
-int myqueue_test();
+void myqueue_test();
 
 #endif

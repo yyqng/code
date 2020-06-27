@@ -42,7 +42,7 @@ int main()
     //trathread_test();
     //bbq_test(100);
     //ring_test();
-    myqueue_test(10);
+    myqueue_test();
     //set_mem_test();
     //test();
 }
