@@ -29,7 +29,7 @@ CXXFLAGS += -Wno-sign-compare
 # LIBS += -lmylib
 INCDIR += -I$(TOP_DIR)/src/mycomm -I$(TOP_DIR)/src/include -I$(TOP_DIR)/src/database -I$(C_INCLUDE_PATH)
 LIBDIR += -L$(TOP_DIR)/lib
-LIBS += -pthread -lboost_regex -lboost_thread -lboost_system -ljemalloc
+LIBS += -pthread -lboost_regex -lboost_thread -lboost_system -ljemalloc# -lboost_circular_buffer
 #LIBS += -lcomm -lgumbo -lboost_regex -ldatabase -locci -lclntsh -lnnz11 -lsqlite3
 # DEFS += -DMY_MACRO
 

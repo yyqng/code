@@ -4,6 +4,9 @@
 #include "stdthread.h"
 #include "trathread.h"
 #include "test.h"
+#include "bbq.h"
+#include "myqueue.h"
+#include "ring_buffer.h"
  
 int mem_test(int argc, char *argv[])
 {
@@ -36,7 +39,10 @@ int main()
     //echo_client();
     //thread_test();
     //stdthread_test();
-    trathread_test();
+    //trathread_test();
+    //bbq_test(100);
+    //ring_test();
+    myqueue_test(10);
     //set_mem_test();
     //test();
 }

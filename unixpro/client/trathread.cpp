@@ -797,19 +797,19 @@ tpool provides CyclicBarrier & CountDownLatch.
 //
 //Please notice that size() and empty() are meaningless in multi-thread programming.
 //*/
-template<typename T>
-class blocking_queue : boost::noncopyable {
-    std::queue<T> m_queue;
-    std::condition_variable m_cond;
-    mutable std::mutex m_mutex;
-public:
-    blocking_queue() {}
-    void push(const T& val);
-    void pop(T& val);
-    bool try_pop(const T& val);
-    size_t size() const;
-    bool empty() const;
-};
+//template<typename T>
+//class blocking_queue : boost::noncopyable {
+//    std::queue<T> m_queue;
+//    std::condition_variable m_cond;
+//    mutable std::mutex m_mutex;
+//public:
+//    blocking_queue() {}
+//    void push(const T& val);
+//    void pop(T& val);
+//    bool try_pop(const T& val);
+//    size_t size() const;
+//    bool empty() const;
+//};
 
 
 
@@ -1402,15 +1402,6 @@ Thread-local storage or local variables can be ruled out as sources of false sha
 
 In following case, a and b will false sharing, tr1's i and tr2's i will false sharing.
 */
-void printTime(struct timespec start, const char *info)
-{
-    struct timespec finish;
-    double elapsed;
-    clock_gettime(CLOCK_MONOTONIC, &finish);
-    elapsed = (finish.tv_sec - start.tv_sec);
-    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-    cout << info << " time cost :" << elapsed << endl;
-}
 int p93(int64_t &a, int64_t &b)
 {
     struct timespec start;

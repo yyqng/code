@@ -22,6 +22,8 @@
 #include <future>
 #include <time.h>
 #include <queue>
+#include <boost/circular_buffer.hpp>
+#include "tools.h"
 
 using namespace std;
 
