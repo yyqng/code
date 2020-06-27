@@ -1,4 +1,3 @@
-#pragma once
 #ifndef __MYQUEUE_H
 #define __MYQUEUE_H
 #include<iostream>
@@ -26,4 +25,4 @@ private:
 };
 int ring_test(void);
 
-#endif // !MYQUEUE_H
+#endif

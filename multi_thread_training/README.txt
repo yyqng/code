@@ -1,2 +1,4 @@
+#My answer to test : answer.txt
+#Usage of the code:
 make
-./test
+./main.out

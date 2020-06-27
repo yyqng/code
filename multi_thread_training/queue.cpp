@@ -1,7 +1,7 @@
-#include "myqueue.h"
+#include "queue.h"
 
 template<typename T>
-void Myqueue<T>::push(const T& ele) {
+void Queue<T>::push(const T& ele) {
     std::unique_lock<std::mutex> uni_lk(m_mutex);
     while (m_ring.full()) {
         m_writable.wait(uni_lk);
@@ -11,7 +11,7 @@ void Myqueue<T>::push(const T& ele) {
 }
 
 template<typename T>
-void Myqueue<T>::pop(T& ele) {
+void Queue<T>::pop(T& ele) {
     std::unique_lock<std::mutex> uni_lk(m_mutex);
     while (m_ring.empty()) {
         m_readable.wait(uni_lk);
@@ -20,9 +20,9 @@ void Myqueue<T>::pop(T& ele) {
     m_writable.notify_one();
 }
 
-int __myqueue_test(int thread_count, int qsize, int op_num)
+int __queue_test(int thread_count, int qsize, int op_num)
 {
-    Myqueue<int> q(qsize);
+    Queue<int> q(qsize);
     list<thread*> threads;
     struct timespec start;
     clock_gettime(CLOCK_MONOTONIC, &start);
@@ -57,14 +57,14 @@ int __myqueue_test(int thread_count, int qsize, int op_num)
     return 0;
 }
 
-void myqueue_test()
+void queue_test()
 {
     int thread_count = 1e4; 
     int qsize = 1e4;
     int op_num = 1000;
-    __myqueue_test(thread_count, qsize, op_num);
-    thread_count = 1e4; 
-    qsize = 1e4;
-    op_num = 1000;
-    __myqueue_test(thread_count, qsize, op_num);
+    __queue_test(thread_count, qsize, op_num);
+//    thread_count = 1e4; 
+//    qsize = 1e4;
+//    op_num = 1000;
+//    __queue_test(thread_count, qsize, op_num);
 }

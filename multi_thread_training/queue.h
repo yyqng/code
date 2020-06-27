@@ -1,5 +1,5 @@
-#ifndef __Myqueue_H
-#define __Myqueue_H
+#ifndef __queue_H
+#define __queue_H
 #include <iostream>
 #include <thread>
 #include <list>
@@ -22,9 +22,9 @@ class noncopyable
 };
 
 template<typename T>
-class Myqueue : noncopyable {
+class Queue : noncopyable {
 public:
-    Myqueue(size_t size) : m_ring(size) {}
+    Queue(size_t size) : m_ring(size) {}
     void push(const T& ele);
     void pop(T& ele);
     bool empty() const;
@@ -36,6 +36,6 @@ private:
     std::condition_variable m_readable;
 };
 
-void myqueue_test();
+void queue_test();
 
 #endif

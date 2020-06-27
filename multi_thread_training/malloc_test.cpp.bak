@@ -5,7 +5,7 @@ void stdmalloc (char **p, int n)
         p[i] = (char*)malloc(sizeof(char));
     }
 };
-static void printTime2(struct timespec start, const char *info)
+void printTime2(struct timespec start, const char *info)
 {
     struct timespec finish;
     double elapsed;
@@ -15,28 +15,28 @@ static void printTime2(struct timespec start, const char *info)
     cout << info << elapsed << " s" << endl;
 }
 
-const int N1 = 1e7;
-char *p1[N1];
-char *p2[N1];
+const int N = 1e7;
+char *p1[N];
+char *p2[N];
 int malloc_test0()
 {
     struct timespec start;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    std::thread thread1(stdmalloc, p1, N1);
+    std::thread thread1(stdmalloc, p1, N);
     thread1.join();
     printTime2(start, "thread1   new.");
-    for (int i = 0; i < N1; ++i) {
+    for (int i = 0; i < N; ++i) {
         free(p1[i]);
         p1[i] = NULL;
     }
 
     clock_gettime(CLOCK_MONOTONIC, &start);
-	std::thread thread3(stdmalloc, p1, N1);
-	std::thread thread4(stdmalloc, p2, N1);
+	std::thread thread3(stdmalloc, p1, N);
+	std::thread thread4(stdmalloc, p2, N);
     thread3.join();
     thread4.join();
     printTime2(start, "thread3/4 new.");
-    for (int i = 0; i < N1; ++i) {
+    for (int i = 0; i < N; ++i) {
         delete p1[i];
         p1[i] = NULL;
         delete p2[i];
@@ -59,12 +59,12 @@ static void *threadf(void *arg)
     pthread_exit(NULL);
 }
 
-int malloc_test()
+int __malloc_test()
 {
-    printf("\nmalloc\n");
+
     pthread_t threads[2];
     memset(&threads, 0, sizeof(threads));
-    Strarg s1 = {p1, N1};
+    Strarg s1 = {p1, N};
     struct timespec start;
     clock_gettime(CLOCK_MONOTONIC, &start);
     if (pthread_create(&threads[0], NULL, threadf, (void*)&s1) == -1) {
@@ -73,7 +73,7 @@ int malloc_test()
     }
     pthread_join(threads[0],NULL);
     printTime2(start, "thread1   malloc.");
-    for (int i = 0; i < N1; ++i) {
+    for (int i = 0; i < N; ++i) {
         free(s1.p[i]);
         s1.p[i] = NULL;
     }
@@ -84,7 +84,7 @@ int malloc_test()
         printf("threads1 create falied\n");
         exit(-1);
     }
-    Strarg s2 = {p2, N1};
+    Strarg s2 = {p2, N};
     if (pthread_create(&threads[1], NULL, threadf, (void*)&s2) == -1) {
         printf("threads1 create falied\n");
         exit(-1);
@@ -92,13 +92,57 @@ int malloc_test()
     pthread_join(threads[0],NULL);
     pthread_join(threads[1],NULL);
     printTime2(start, "thread0/1 malloc.");
-    for (int i = 0; i < N1; ++i) {
+    for (int i = 0; i < N; ++i) {
         free(s1.p[i]);
         s1.p[i] = NULL;
         free(s2.p[i]);
         s2.p[i] = NULL;
     }
     return 0;
-    printf("\n\n");
 }
 
+extern "C"
+{
+#include "jemalloc/jemalloc.h"
+}
+void jemalloc(char **p, int n)
+{
+    for (int i = 0; i < n; ++i) {
+        p[i] = (char*)mallocx(sizeof(char), 0);
+    }
+}
+
+int jemalloc_test()
+{
+    struct timespec start;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    std::thread thread1(jemalloc, p1, N);
+    thread1.join();
+    printTime2(start, "thread1   mallocx.");
+    for (int i = 0; i < N; ++i) {
+        p1[i] = NULL;
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    std::thread thread3(jemalloc, p1, N);
+    std::thread thread4(jemalloc, p2, N);
+    thread3.join();
+    thread4.join();
+    printTime2(start, "thread3/4 mallocx.");
+    for (int i = 0; i < N; ++i) {
+        p1[i] = NULL;
+        p2[i] = NULL;
+    }
+    return 0;
+}
+
+int malloc_test()
+{
+    printf("\nmalloc\n");
+    __malloc_test();
+    //malloc_test0();
+    printf("\njemalloc\n");
+    jemalloc_test();
+    printf("\n\n");
+    return 0;
+}
