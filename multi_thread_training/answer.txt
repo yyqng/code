@@ -1,0 +1,26 @@
+/*
+选择题
+1. C
+2. D
+3. A
+4. E
+
+问答题:
+5. std::lock_guard和std::unique_lock有什么区别? 各有什么使用场景?(10分)
+    lock_guard使用起来比较简单，除了构造函数外没有其他member function，在整个区域都有效。
+    unique_guard除了lock_guard的功能外，提供了更多的member_function，相对来说更灵活一些。
+    unique_guard的最有用的一组函数为： lock, unlock, try_lock, try_lock_for, try_lock_until
+    通过这些函数，可以灵活的控制锁的范围和加锁的等待时间，但是资源的消耗要大一些。
+
+6. 什么是false sharing, 写一个简单的代码示例, 并提供解决方法(15分)
+    当多线程修改互相独立的变量时，如果这些变量共享同一个缓存行，就会无意中影响彼此的性能，这就是伪共享。
+    示例代码的解决方法是使多线程访问的变量无法在同一个缓存行容纳。
+    false_sharing.cpp
+
+
+7. 内存分配会成为多线程程序的性能瓶颈吗, 如果是, 写一个简单的代码示例, 并提供解决方法(20分)
+    malloc_test.cpp
+
+8. 以C++11标准库实现bounded blocking queue并测量其性能 (30分)
+    myqueue.cpp
+
