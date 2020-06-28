@@ -51,7 +51,7 @@ int __queue_test(int thread_count, int qsize, int op_num)
     nm += (finish.tv_nsec - start.tv_nsec);
     cout << "number of threads:" << thread_count << endl;
     cout << "queue size :" << qsize << "(int)"  << endl;
-    cout << "push + pop:" << op_num << " times / thread" << endl;
+    cout << "push + pop " << op_num << " times / thread" << endl;
     cout << "total time cost :" << nm / 1e9 << "s  " << endl;
     cout << nm / thread_count / op_num << " nm / (push + pop)" << endl << endl;
     return 0;
@@ -59,9 +59,9 @@ int __queue_test(int thread_count, int qsize, int op_num)
 
 void queue_test()
 {
-    int thread_count = 1e4; 
-    int qsize = 1e4;
-    int op_num = 1000;
+    int thread_count = 1e2; 
+    int qsize = 1e2;
+    int op_num = 1e1;
     __queue_test(thread_count, qsize, op_num);
 //    thread_count = 1e4; 
 //    qsize = 1e4;

@@ -1,7 +1,8 @@
 #include "malloc_test.h"
 #include "jemalloc_test.h"
-#include "myqueue.h"
+#include "queue.h"
 #include "false_sharing.h"
+#include "ring_buffer.h"
 
 int main()
 {

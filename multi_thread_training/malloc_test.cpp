@@ -1,10 +1,15 @@
 #include "malloc_test.h"
-void stdmalloc (char **p, int n)
+const int N1 = 1e7;
+char *p1[N1];
+char *p2[N1];
+
+void stdmalloc (char **p)
 { 
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < N1; ++i) {
         p[i] = (char*)malloc(sizeof(char));
     }
 };
+
 static void printTime2(struct timespec start, const char *info)
 {
     struct timespec finish;
@@ -12,30 +17,27 @@ static void printTime2(struct timespec start, const char *info)
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-    cout << info << elapsed << " s" << endl;
+    cout << info << N1 << " times.Total time cost: " << elapsed << " s" << endl;
 }
 
-const int N1 = 1e7;
-char *p1[N1];
-char *p2[N1];
 int malloc_test0()
 {
     struct timespec start;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    std::thread thread1(stdmalloc, p1, N1);
+    std::thread thread1(stdmalloc, p1);
     thread1.join();
-    printTime2(start, "thread1   new.");
+    printTime2(start, "Single thread malloc ");
     for (int i = 0; i < N1; ++i) {
         free(p1[i]);
         p1[i] = NULL;
     }
 
     clock_gettime(CLOCK_MONOTONIC, &start);
-	std::thread thread3(stdmalloc, p1, N1);
-	std::thread thread4(stdmalloc, p2, N1);
+	std::thread thread3(stdmalloc, p1);
+	std::thread thread4(stdmalloc, p2);
     thread3.join();
     thread4.join();
-    printTime2(start, "thread3/4 new.");
+    printTime2(start, "Two threads. each thread malloc ");
     for (int i = 0; i < N1; ++i) {
         delete p1[i];
         p1[i] = NULL;
@@ -72,7 +74,7 @@ int malloc_test()
         exit(-1);
     }
     pthread_join(threads[0],NULL);
-    printTime2(start, "thread1   malloc.");
+    printTime2(start, "Single thread malloc ");
     for (int i = 0; i < N1; ++i) {
         free(s1.p[i]);
         s1.p[i] = NULL;
@@ -91,7 +93,7 @@ int malloc_test()
     }
     pthread_join(threads[0],NULL);
     pthread_join(threads[1],NULL);
-    printTime2(start, "thread0/1 malloc.");
+    printTime2(start, "Two threads. each thread malloc ");
     for (int i = 0; i < N1; ++i) {
         free(s1.p[i]);
         s1.p[i] = NULL;

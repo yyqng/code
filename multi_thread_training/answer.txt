@@ -15,11 +15,37 @@
     当多线程修改互相独立的变量时，如果这些变量共享同一个缓存行，就会无意中影响彼此的性能，这就是伪共享。
     示例代码的解决方法是使多线程访问的变量无法在同一个缓存行容纳。
     false_sharing.cpp
+    output of the program(test in BUS VDI, hostname: fdev060701)
+
+    Before fix false sharing problem:
+    Single thread change a 1e8 times, total time cost:  time cost :0.356262
+    Single thread change b 1e8 times, total time cost:  time cost :0.357184
+    Two threads change ab 1e8 times at the same time. Total time cost:  time cost :0.831496
+    After fix false sharing problem:
+    Single thread change a 1e8 times, total time cost:  time cost :0.357541
+    Single thread change b 1e8 times, total time cost:  time cost :0.356343
+    Two threads change ab 1e8 times at the same time. Total time cost:  time cost :0.357641
 
 
 7. 内存分配会成为多线程程序的性能瓶颈吗, 如果是, 写一个简单的代码示例, 并提供解决方法(20分)
     malloc_test.cpp 和 jemalloc_test.cpp 未发现明显性能差异。
+    output of the program(test in BUS VDI, hostname: fdev060701)
+
+    malloc
+    Single thread malloc 10000000 times.Total time cost: 0.181505 s
+    Two threads. each thread malloc 10000000 times.Total time cost: 0.185158 s
+    
+    jemalloc
+    Single thread mallocx 10000000 times. Total time cost: 0.214159 s
+    Two threads. each thread mallocx 10000000 times. Total time cost: 0.219422 s
 
 8. 以C++11标准库实现bounded blocking queue并测量其性能 (30分)
     queue.cpp
+    output of the program(test in BUS VDI, hostname: fdev060701)
+
+    number of threads:100
+    queue size :100(int)
+    push + pop 10 times / thread
+    total time cost :0.00277299s
+    2772.99 nm / (push + pop)
 

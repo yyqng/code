@@ -31,27 +31,28 @@ int __false_sharing(int64_t &a, int64_t &b)
 	};
 	std::thread thread1(fa, std::ref(a));
     thread1.join();
-    printTime(start, "change  a.");
+    printTime(start, "Single thread change a 1e8 times, total time cost: ");
 
     clock_gettime(CLOCK_MONOTONIC, &start);
 	std::thread thread2(fa, std::ref(b));
     thread2.join();
-    printTime(start, "change  b.");
+    printTime(start, "Single thread change b 1e8 times, total time cost: ");
 
     clock_gettime(CLOCK_MONOTONIC, &start);
 	std::thread thread4(fa, std::ref(a));
 	std::thread thread3(fa, std::ref(b));
     thread3.join();
     thread4.join();
-    printTime(start, "change ab.");
+    printTime(start, "Two threads change ab 1e8 times at the same time. Total time cost: ");
     return 0;
 }
 
 int false_sharing()
 {
     int64_t a[2] = {0};
+    cout << "Before fix false sharing problem:" << endl;
     __false_sharing(a[0], a[1]);
-    cout << "After fix" << endl;
+    cout << "After fix false sharing problem:" << endl;
     int64_t b[64] = {0};
     __false_sharing(b[0], b[63]);
     return 0;
