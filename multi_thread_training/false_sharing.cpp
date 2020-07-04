@@ -16,7 +16,7 @@ void printTime(struct timespec start, const char *info)
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-    cout << info << " time cost :" << elapsed << endl;
+    cout << info << " Total time cost: " << elapsed << endl;
 }
 
 int __false_sharing(int64_t &a, int64_t &b)
@@ -31,19 +31,19 @@ int __false_sharing(int64_t &a, int64_t &b)
 	};
 	std::thread thread1(fa, std::ref(a));
     thread1.join();
-    printTime(start, "Single thread change a 1e8 times, total time cost: ");
+    printTime(start, "Single thread change a 1e8 times.");
 
     clock_gettime(CLOCK_MONOTONIC, &start);
 	std::thread thread2(fa, std::ref(b));
     thread2.join();
-    printTime(start, "Single thread change b 1e8 times, total time cost: ");
+    printTime(start, "Single thread change b 1e8 times.");
 
     clock_gettime(CLOCK_MONOTONIC, &start);
 	std::thread thread4(fa, std::ref(a));
 	std::thread thread3(fa, std::ref(b));
     thread3.join();
     thread4.join();
-    printTime(start, "Two threads change ab 1e8 times at the same time. Total time cost: ");
+    printTime(start, "Two threads change a b 1e8 times separately.");
     return 0;
 }
 

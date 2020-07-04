@@ -1,8 +1,8 @@
 选择题
 1. C
-2. D
+2. A
 3. A
-4. E
+4. C
 
 问答题:
 5. std::lock_guard和std::unique_lock有什么区别? 各有什么使用场景?(10分)
@@ -16,36 +16,39 @@
     示例代码的解决方法是使多线程访问的变量无法在同一个缓存行容纳。
     false_sharing.cpp
     output of the program(test in BUS VDI, hostname: fdev060701)
+    .so and .h are here: /home/yoyu/hub.z/jemalloc-5.2.1/mylib/
 
     Before fix false sharing problem:
-    Single thread change a 1e8 times, total time cost:  time cost :0.356262
-    Single thread change b 1e8 times, total time cost:  time cost :0.357184
-    Two threads change ab 1e8 times at the same time. Total time cost:  time cost :0.831496
+    Single thread change a 1e8 times. Total time cost: 0.357632
+    Single thread change b 1e8 times. Total time cost: 0.358475
+    Two threads change a b 1e8 times separately. Total time cost: 1.1203
     After fix false sharing problem:
-    Single thread change a 1e8 times, total time cost:  time cost :0.357541
-    Single thread change b 1e8 times, total time cost:  time cost :0.356343
-    Two threads change ab 1e8 times at the same time. Total time cost:  time cost :0.357641
-
+    Single thread change a 1e8 times. Total time cost: 0.357911
+    Single thread change b 1e8 times. Total time cost: 0.362184
+    Two threads change a b 1e8 times separately. Total time cost: 0.362285
 
 7. 内存分配会成为多线程程序的性能瓶颈吗, 如果是, 写一个简单的代码示例, 并提供解决方法(20分)
-    malloc_test.cpp 和 jemalloc_test.cpp 未发现明显性能差异。
+    no.
+    _new_test() 和 _jemalloc_test() 未发现明显性能差异。
     output of the program(test in BUS VDI, hostname: fdev060701)
+    .so and .h are here: /home/yoyu/hub.z/boost_1_66_0/mylib/
 
-    malloc
-    Single thread malloc 10000000 times.Total time cost: 0.181505 s
-    Two threads. each thread malloc 10000000 times.Total time cost: 0.185158 s
+    Use new:
+    Single thread allocate 8000000 times.Total time cost: 1.93032 s
+    8 threads. each thread allocate 1000000 times.Total time cost: 0.387437 s
     
-    jemalloc
-    Single thread mallocx 10000000 times. Total time cost: 0.214159 s
-    Two threads. each thread mallocx 10000000 times. Total time cost: 0.219422 s
+    Use mallocx(jemalloc):
+    Single thread allocate 8000000 times.Total time cost: 1.26119 s
+    8 threads. each thread allocate 1000000 times.Total time cost: 0.442952 s
 
 8. 以C++11标准库实现bounded blocking queue并测量其性能 (30分)
     queue.cpp
     output of the program(test in BUS VDI, hostname: fdev060701)
 
+    bounded blocking queue test:
     number of threads:100
     queue size :100(int)
-    push + pop 10 times / thread
-    total time cost :0.00277299s
-    2772.99 nm / (push + pop)
+    push + pop 100 times / thread
+    total time cost :0.0107335s
+    1073.35 nm / (push + pop)
 

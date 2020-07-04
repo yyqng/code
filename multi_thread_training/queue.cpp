@@ -20,6 +20,22 @@ void Queue<T>::pop(T& ele) {
     m_writable.notify_one();
 }
 
+int _queue_test(int qsize)
+{
+    Queue<int> q(qsize);
+    int i = 9;
+    int j = 0;
+    q.push(i);
+    cout << "push i = " << i << endl;
+    cout << "pop  j = " << j << endl;
+    q.push(i);
+    q.push(i);
+    q.pop(j);
+    cout << "pop  j = " << j << endl;
+    q.push(i);
+    return 0;
+}
+
 int __queue_test(int thread_count, int qsize, int op_num)
 {
     Queue<int> q(qsize);
@@ -30,8 +46,6 @@ int __queue_test(int thread_count, int qsize, int op_num)
         int data;
         for (int i = 0; i < op_num; ++i) {
             q.push(base * 10 + i);
-        }
-        for (int i = 0; i < op_num; ++i) {
             q.pop(data);
         }
     };
@@ -40,8 +54,10 @@ int __queue_test(int thread_count, int qsize, int op_num)
         std::thread *new_thread = new thread(f, i);
         threads.push_back(new_thread);
     }
+    int i = 0;
     for(auto it : threads) {
         it->join();
+        ++i;
         delete it;
     }
     struct timespec finish;
@@ -49,11 +65,12 @@ int __queue_test(int thread_count, int qsize, int op_num)
     clock_gettime(CLOCK_MONOTONIC, &finish);
     nm = (finish.tv_sec - start.tv_sec) * 1e9;
     nm += (finish.tv_nsec - start.tv_nsec);
+    cout << "bounded blocking queue test:" << endl;
     cout << "number of threads:" << thread_count << endl;
     cout << "queue size :" << qsize << "(int)"  << endl;
     cout << "push + pop " << op_num << " times / thread" << endl;
     cout << "total time cost :" << nm / 1e9 << "s  " << endl;
-    cout << nm / thread_count / op_num << " nm / (push + pop)" << endl << endl;
+    cout << nm / thread_count / op_num << " nm / (push + pop)" << endl;
     return 0;
 }
 
@@ -61,7 +78,7 @@ void queue_test()
 {
     int thread_count = 1e2; 
     int qsize = 1e2;
-    int op_num = 1e1;
+    int op_num = 1e2;
     __queue_test(thread_count, qsize, op_num);
 //    thread_count = 1e4; 
 //    qsize = 1e4;

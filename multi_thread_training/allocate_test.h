@@ -4,8 +4,9 @@
 #include <iostream>
 #include <thread>
 #include <time.h>
+#include "jemalloc/jemalloc.h"
 using namespace std;
 
-int malloc_test();
+int allocate_test();
 
 #endif
