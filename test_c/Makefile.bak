@@ -1,4 +1,4 @@
-TARGET = main.out
+TARGET = test.out
 
 CXX_STD = -std=c++11
 CFLAGS = -Wall -Werror #-quiet
@@ -11,8 +11,7 @@ DEP_FILES = $(patsubst %.c,%.c.d,$(C_FILES)) $(patsubst %.cpp,%.cpp.d,$(CXX_FILE
 OBJ_FILES = $(DEP_FILES:.d=.o)
 NODEPS = clean
 
-#all: release
-all: debug
+all: release
 
 $(TARGET): $(OBJ_FILES)
 	@printf "\e[1;33m %-16s\e[0m%s/$@\n" "linking" "`pwd`"
@@ -50,5 +49,4 @@ ifeq (0, $(words $(findstring $(MAKECMDGOALS), $(NODEPS))))
 	-include $(DEP_FILES)
 endif
 
-LIBS += -pthread -lboost_thread -lboost_system -ljemalloc -lboost_regex -lm
-#LIBS += -lm -lboost_regex lib1.so lib2.so
+LIBS += -lm -lboost_regex

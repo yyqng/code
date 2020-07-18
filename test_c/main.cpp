@@ -1,9 +1,4 @@
-#include <stdio.h>  
-#include <stddef.h>
-#include <string.h>
-#include <stdint.h>  
-#include <math.h>  
-#include "test.h"
+#include "main.h"
 //#include <string>
 //#include <vector>
 #define _Conn_(x,y)  (x##y)
@@ -235,26 +230,29 @@ int ptrdiff_t_test()
     return 0;
 }
 
-
-//valgrind --leak-check=yes ./test.out
-int valgrind_test()
+int sscanf_test()
 {
-    char buf[256] = {0};
-//    char buf[256];
-    buf[255] = 0; // prevent overflow
-    double f = 2.0;
-    int i = 0;
-    i = sscanf(buf, "(f = %lf)\n)", &f);
-    printf("i = %d, but = %s\n", i, buf);
-    return 0;
+   int day, year;
+   char weekday[20], month[20], dtm[100];
 
-    char str[100] ="123568qwerSDDAE";
-    char lowercase[100];
-    int num;
-    sscanf(str,"%d %[a-z]", &num, lowercase);
-    printf("The number is: %d.\n", num);
-    printf("The lowercase is: %s.\n", lowercase);
-    return 0;
+   strcpy( dtm, "Saturday March 25 1989" );
+   sscanf( dtm, "%s %s %d  %d", weekday, month, &day, &year );
+
+   printf("%s %d, %d = %s\n", month, day, year, weekday );
+    
+   return(0);
+}
+
+int print_test()
+{
+   float day = 0.111;
+   double year = 0.222;
+   if (&day == (float *)0x7fffffffdb44) {
+       printf("Equal \n");
+   }
+   printf("%f %f\n", day, year);
+    
+   return(0);
 }
 
 int main()
@@ -277,5 +275,7 @@ int main()
     //ptrdiff_t_test();
     //const char p[] = "echo \"\" > test.bak";
     //system(p);
-    valgrind_test();
+    //valgrind_test();
+    print_test();
+    //sscanf_test();
 }

@@ -2,7 +2,7 @@ ifndef V
 	MAKEFLAGS += -s
 endif
 
-SUB_DIRS = algorithm  mycomm  curl  data signal  string  time  unix cpp libc proccess
+SUB_DIRS = algorithm  mycomm  data signal  string  time  unix cpp libc proccess #curl  
 
 all: debug
 

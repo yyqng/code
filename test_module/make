@@ -1,0 +1,10 @@
+#gcc -O0 -g -ggdb a.cpp -o lib_a.a -c -fPIC
+#gcc -O0 -g -ggdb b.cpp -o b.out -fPIC -ldl -L$PWD -l_a -l_c -lstdc++
+#gcc -O0 -g -ggdb c.cpp -o lib_c.a  -L$PWD -l_a -lstdc++
+
+gcc -O0 -std=c++11 -g -ggdb a.cpp -o lib_a.a -c -fPIC
+gcc -O0 -std=c++11 -g -ggdb b.cpp -o b.out -fPIC -ldl -L$PWD -l_a -lstdc++
+gcc -O0 -std=c++11 -g -ggdb c.cpp -o lib_c.so -shared -fPIC -L$PWD -l_a -lstdc++
+./b.out
+#valgrind --leak-check=yes  --leak-check=full --show-leak-kinds=all --log-file=valgrind.log ./b.out
+#cat valgrind.log
