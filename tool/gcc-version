@@ -1,0 +1,5 @@
+sudo yum install centos-release-scl scl-utils-build scl-utils
+yum list all --enablerepo='centos-sclo-rh'|grep gcc
+scl --list 或scl -l
+scl enable devtoolset-8 bash
+scl --help 或 scl -h

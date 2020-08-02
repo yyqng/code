@@ -145,6 +145,16 @@ double callfLuafTest2() {
     return z;
 }
 
+double callfLuafile() {
+    char filename[] = "test.lua";
+    lua_State *L = luaL_newstate();
+    luaopen_base(L);
+    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0)) {
+        error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
+    }
+    return 0;
+}
+
 void luaapitest() {
     lua_State *L = luaL_newstate();
     printf ("lua_version(NULL) = %f\n", *(double*)lua_version(NULL));
@@ -197,7 +207,8 @@ int main(void)
     //lualenTest();
     //loadConf();
     //loadTable();
-    callfLuafTest2();
+    //callfLuafTest2();
+    callfLuafile();
     //callfLuafTest();
     //luaapitest();
     //definetest();
