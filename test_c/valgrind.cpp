@@ -86,10 +86,52 @@ int _valgrind_test5()
     return 0;
 }
 
+typedef struct
+{
+    int x;
+    int y;
+} Vtx;
+
+#define VV_X(p) ((p)->x)
+#define VV_Y(p) ((p)->y)
+
+#define VV_SUB(p, q, v)              \
+    {                                \
+        VV_X(v) = (p) - (q);         \
+        VV_Y(v) = (p) - (q);         \
+    }
+
+#define VV_CALCDIR(x, y, dir)                                                                                          \
+    {                                                                                                                  \
+        if ((y) == 0) {                                                                                                \
+            (dir) = ((x) >= 0) ? 0 : 4;                                                                                \
+        } else if ((x) == 0) {                                                                                         \
+            (dir) = ((y) >= 0) ? 2 : 6;                                                                                \
+        } else if ((x) == (y)) {                                                                                       \
+            (dir) = ((x) >= 0) ? 1 : 5;                                                                                \
+        } else if ((x) == -(y)) {                                                                                      \
+            (dir) = ((y) >= 0) ? 3 : 7;                                                                                \
+        } else {                                                                                                       \
+            (dir) = 16;                                                                                                \
+        }                                                                                                              \
+    }
+
+int _valgrind_test6()
+{
+    /* calculate current vertex's direction */
+    int p = 10;
+    int q = 2;
+    Vtx vv;
+    int dir = 0;
+    VV_SUB(p, q, &vv);
+    VV_CALCDIR(vv.x, vv.y, dir);
+    return dir;
+}
+
 //valgrind --leak-check=yes ./main.out
 //valgrind --leak-check=yes  --leak-check=full --show-leak-kinds=all --log-file=valgrind.log ./main.out
 int valgrind_test()
 {
-    _valgrind_test5();
+    _valgrind_test6();
     return 0;
 }

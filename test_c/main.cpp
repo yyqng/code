@@ -243,6 +243,9 @@ int sscanf_test()
    return(0);
 }
 
+//#define TBX_VERSION_E20_06_0 on  20200600
+//#define TBX_VERSION_E20_06_0_1   on  20200724    from    TBX_VERSION_E20_06_0
+#define TBX_VERSION_E20_06_0 20200600
 int print_test()
 {
    float day = 0.111;
@@ -251,7 +254,14 @@ int print_test()
        printf("Equal \n");
    }
    printf("%f %f\n", day, year);
+   cout << endl;
+   cout << TBX_VERSION_E20_06_0 << endl;
     
+    int64_t right;
+    int64_t left;
+    printf("yyy: dt_merge_sbar right = %ld, left = %ld\n", 
+            right, left);
+
    return(0);
 }
 
@@ -275,7 +285,7 @@ int main()
     //ptrdiff_t_test();
     //const char p[] = "echo \"\" > test.bak";
     //system(p);
-    //valgrind_test();
+    valgrind_test();
     print_test();
     //sscanf_test();
 }

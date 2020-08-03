@@ -58,6 +58,8 @@ int doxygen_test(int a ,int b)
 //reps=10 msg="Ha" ./test
 void print_env()
 {
+    printf("print test1  "
+           "print test2\n");
     char *repstext = getenv("reps");
     int reps = repstext ? atoi(repstext) : 2;
 
@@ -102,15 +104,19 @@ void switch_case0(int input)
             break;
     }
 }
+void switch_case_test()
+{
+    switch_case0(1);
+    switch_case0(2);
+    switch_case0(15);
+}
 int main()
 {
 //    assert(0);
     //exit(3);
     //abort();
-    int *p = (int*)malloc(sizeof(int));
+    //int *p = (int*)malloc(sizeof(int));
     //free(p);
-    switch_case0(1);
-    switch_case0(2);
-    switch_case0(15);
-//   print_env();
+    //switch_case_test();
+   print_env();
 }

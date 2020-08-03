@@ -59,12 +59,45 @@ end
 
 --debugMask = 1;
 --debugOutputMask("SRIF", debugMask)
-bittest(0)
-bittest(1)
-bittest(2)
-bittest(3)
-bittest(4)
-bittest(5)
-bittest(6)
-bittest(7)
-bittest(8)
+
+local bittest_main=function(mask)
+    bittest(0)
+    bittest(1)
+    bittest(2)
+    bittest(3)
+    bittest(4)
+    bittest(5)
+    bittest(6)
+    bittest(7)
+    bittest(8)
+end
+
+local vv_test = function(mask)
+    local vv = {
+        {{}, 6, 220},
+        5
+    }
+    local type_error_msg = "[ERROR] DT.correction USER_LAYER is expected to be a table of tables,"..
+                       " each table is formatted as {layer_handle, FT, FL}"
+    if (type(vv) ~= "table") then
+        print(type_error_msg)
+        return
+    end
+
+    if (vv ~= nil) then
+        for k, v in pairs (vv) do
+            if (type(v) ~= "table") then
+                print(type_error_msg)
+                return
+            end
+            local layer = v[1]
+            local ftype = v[2]
+            local flevel = v[3]
+            print("type(v) = "..type(v)) 
+            print("type(layer) = "..type(layer)) 
+            print("type(ftype) = "..type(ftype)) 
+            print("type(flevel) = "..type(flevel)) 
+        end
+    end
+end
+vv_test()
