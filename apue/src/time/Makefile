@@ -1,5 +1,5 @@
 TOP_DIR = ../..
-TARGET = $(TOP_DIR)/bin/test-time
+TARGET = $(TOP_DIR)/bin/time.out
 #TARGET = ./mycode
 
 include $(TOP_DIR)/vars.mk

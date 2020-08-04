@@ -1,5 +1,5 @@
 TOP_DIR = ../..
-TARGET = $(TOP_DIR)/bin/test-signal
+TARGET = $(TOP_DIR)/bin/signal.out
 
 include $(TOP_DIR)/vars.mk
 include $(TOP_DIR)/rules.mk

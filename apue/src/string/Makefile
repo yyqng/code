@@ -1,5 +1,5 @@
 TOP_DIR = ../..
-TARGET = $(TOP_DIR)/bin/test-string
+TARGET = $(TOP_DIR)/bin/string.out
 #TARGET = ./mycode
 
 include $(TOP_DIR)/vars.mk

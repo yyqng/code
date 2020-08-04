@@ -1,5 +1,5 @@
 TOP_DIR = ../..
-TARGET = $(TOP_DIR)/bin/test-process
+TARGET = $(TOP_DIR)/bin/process.out
 #TARGET = ./mycode
 
 include $(TOP_DIR)/vars.mk
