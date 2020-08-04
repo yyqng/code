@@ -1,9 +1,11 @@
+//#define NDEBUG
 #include <stdio.h>  
 #include <stdint.h>  
 #include <stdlib.h>  
 #include <math.h>  
 #include <limits.h>  
 #include <assert.h>
+#include "hmtest.h"
 //c99 -xc - -lm -g -Wall -include stdio.h -O3 << '---' 
 //int main(){printf("Hello from the command line.\n");} 
 //---
@@ -102,6 +104,7 @@ void switch_case0(int input)
             printf("0\n");
             printf("000\n");
             break;
+            break;
     }
 }
 void switch_case_test()
@@ -112,11 +115,13 @@ void switch_case_test()
 }
 int main()
 {
+    hm_test();
 //    assert(0);
     //exit(3);
     //abort();
     //int *p = (int*)malloc(sizeof(int));
     //free(p);
-    //switch_case_test();
-   print_env();
+   //switch_case_test();
+   //print_env();
+   assert(1);
 }

@@ -1,4 +1,4 @@
-#include"biasTable.h"
+#include"biastable.h"
 /*
 Use function: F(x, y)=a*x+b to match
 F(x[0])=v[0]
@@ -278,7 +278,7 @@ static double tbxCalValueBy3DTable(
     return ret;
 }
 
-int main()
+int bias_test()
 {
     int len[3] = {3, 3, 3};
     double *table3D[3];
@@ -307,4 +307,5 @@ int main()
         }
         printf("=======================\n");
     }
+    return 0;
 }

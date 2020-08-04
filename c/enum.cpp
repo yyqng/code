@@ -22,7 +22,7 @@ int print_value_of_enum(int who)
     return 0;
 }
 
-int main()
+int enum_test()
 {
     print_value_of_enum(Tom);
     print_value_of_enum(Sharon);

@@ -16,7 +16,7 @@ typedef union dt_precond_optval_s {
 
 } dt_precond_optval_t;
 
-void union_test()
+void _union_test()
 {
     int append = 1, skip_markvtx = 2, flag = 3, sethole = 4, sort = 5, dissected = 6, mask_tag = 7;
     int copy_attachment = 8;
@@ -41,8 +41,8 @@ void union_test()
 
 }
 
-int main()
+int union_test()
 {
-    union_test();
+    _union_test();
     return 0;
 }
