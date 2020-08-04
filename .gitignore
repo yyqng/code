@@ -10,6 +10,7 @@
 *.log
 *tags
 unixpro/bin/*
+apue/bin/*
 *test
 c/html
 c/latex

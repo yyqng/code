@@ -1,5 +1,5 @@
 TOP_DIR = ..
-TARGET = $(TOP_DIR)/bin/server
+TARGET = $(TOP_DIR)/bin/server.out
 
 include $(TOP_DIR)/vars.mk
 include $(TOP_DIR)/rules.mk
