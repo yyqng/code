@@ -121,7 +121,19 @@ int main()
     //abort();
     //int *p = (int*)malloc(sizeof(int));
     //free(p);
-   //switch_case_test();
-   //print_env();
-   assert(1);
+    //switch_case_test();
+    //print_env();
+    assert(1);
+    struct DoubleXY {
+        double x;
+        double y;
+    }b[2];
+    if (b[0].x > 0 &&
+        b[0].y > 0)
+    //if (b[0].x > 0)
+        printf("hello1");
+    if (b[0].x > 0 &&
+        b[0].y > 0)
+    //if (b[0].x > 0)
+        printf("hello2");
 }

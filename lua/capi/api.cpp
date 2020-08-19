@@ -145,13 +145,69 @@ double callfLuafTest2() {
     return z;
 }
 
-double callfLuafile() {
+double execLuafile() {
     char filename[] = "test.lua";
     lua_State *L = luaL_newstate();
     luaopen_base(L);
     if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0)) {
         error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
     }
+    return 0;
+}
+
+int callGlobalLuafun(lua_State *L = NULL) {
+    char filename[] = "test.lua";
+    if (!L) {
+        L = luaL_newstate();
+        luaopen_base(L);
+        if (luaL_dofile(L, filename)) {
+            error(L, "luaL_dofile: %s", lua_tostring(L, -1));
+        }
+    }
+    for (int i = 0; i < 2; ++i) {
+        lua_getglobal(L, "GlobalFunction");
+        if (!lua_isfunction(L, -1)) {
+            printf ("GlobalFunction is not exist\n");
+            return -1;
+        }
+        if (lua_pcall(L, 0, 0, 0) != 0) {
+            printf ("lua_pcall: %s\n", lua_tostring(L, -1));
+            return -1;
+        }
+    }
+    return 0;
+}
+
+int callLuafun() {
+    char filename[] = "test.lua";
+    lua_State *L = luaL_newstate();
+    luaopen_base(L);
+    if (luaL_dofile(L, filename)) {
+        error(L, "luaL_dofile : %s", lua_tostring(L, -1));
+    }
+    for (int i = 0; i < 2; ++i) {
+        lua_getglobal(L, "test");
+        if (!lua_istable(L, -1)) {
+            printf ("test is not exist\n");
+            return -1;
+        }
+        
+        lua_getfield(L, -1, "test_lua_func");
+        if (!lua_isfunction(L, -1)) {
+            printf ("test_lua_func is not exist\n");
+            //cout << "GlobalFunction is not exist" << endl;
+            return -1;
+        }
+        
+        lua_pushnumber(L, 11);
+        lua_pushnumber(L, 22);
+        if (lua_pcall(L, 2, 1, 0) != 0) {
+            printf ("error %s\n", lua_tostring(L, -1));
+            return -1;
+        }
+    }
+    callGlobalLuafun(L);
+
     return 0;
 }
 
@@ -208,7 +264,9 @@ int main(void)
     //loadConf();
     //loadTable();
     //callfLuafTest2();
-    callfLuafile();
+    //execLuafile();
+    //callGlobalLuafun();
+    callLuafun();
     //callfLuafTest();
     //luaapitest();
     //definetest();
