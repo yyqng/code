@@ -227,7 +227,17 @@ void definetest()
 //#define NILCONSTANT	{NULL}, LUA_TNIL
 //#define NILCONSTANT	NULL
 //    printf ("NILCONSTANT = %s\n", NILCONSTANT);
+#ifdef __STRICT_ANSI__
+    printf ("__STRICT_ANSI__ defined\n");
+#endif
 
+#ifdef __x86_64
+        printf ("__x86_64 defined\n");
+#endif
+
+#if (0)
+    #error if error
+#endif
 }
 
 /*
@@ -266,8 +276,8 @@ int main(void)
     //callfLuafTest2();
     //execLuafile();
     //callGlobalLuafun();
-    callLuafun();
+    //callLuafun();
     //callfLuafTest();
     //luaapitest();
-    //definetest();
+    definetest();
 }
