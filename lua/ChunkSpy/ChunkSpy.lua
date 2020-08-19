@@ -84,7 +84,7 @@ CONFIGURATION = {
     description = "x86 standard (32-bit, little endian, doubles)",
     endianness = 1,             -- 1 = little endian
     size_int = 4,               -- (data type sizes in bytes)
-    size_size_t = 4,
+    size_size_t = 8,--4,
     size_Instruction = 4,
     size_lua_Number = 8,        -- this & integral identifies the
     integral = 0,               -- type of lua_Number
@@ -94,7 +94,7 @@ CONFIGURATION = {
     description = "(32-bit, big endian, ints)",
     endianness = 0,
     size_int = 4,
-    size_size_t = 4,
+    size_size_t = 8,--4,
     size_Instruction = 4,
     size_lua_Number = 4,
     integral = 1,

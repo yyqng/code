@@ -14,4 +14,5 @@
 --1. enter lua interactive mode
 --2. > dofile("a.lua")
 --3. > dofile("b.lua"
-print(x)
+--print(x)
+local a = 1
