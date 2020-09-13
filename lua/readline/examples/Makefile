@@ -29,7 +29,7 @@ datarootdir = ${prefix}/share
 bindir = ${exec_prefix}/bin
 srcdir = .
 datadir = ${datarootdir}
-VPATH = .
+
 top_srcdir = ..
 #BUILD_DIR = .
 BUILD_DIR = /home/yoyu/hub/testcode/lua/readline
@@ -55,7 +55,7 @@ INCLUDES = -I$(srcdir) -I$(top_srcdir) -I..
 
 CCFLAGS  = $(ASAN_CFLAGS) $(DEFS) $(LOCAL_CFLAGS) $(INCLUDES) $(CPPFLAGS) \
 	$(CFLAGS)
-LDFLAGS = -g -L..  $(ASAN_LDFLAGS)
+LDFLAGS = -g -L..  -L./lib/termcap $(ASAN_LDFLAGS)
 
 ASAN_XCFLAGS = -fsanitize=address -fno-omit-frame-pointer
 ASAN_XLDFLAGS = -fsanitize=address

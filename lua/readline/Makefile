@@ -29,7 +29,7 @@ PACKAGE_VERSION = 8.0
 PACKAGE_TARNAME = readline
 
 srcdir = .
-VPATH = .
+
 top_srcdir = .
 BUILD_DIR = /home/yoyu/hub/testcode/lua/readline
 

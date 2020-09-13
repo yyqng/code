@@ -13,7 +13,7 @@
 #输出lua文件的opcode
 #lua ../ChunkSpy/ChunkSpy.lua --source test.lua
 #echo =============================================
-lua ../ChunkSpy/ChunkSpy.lua --source b.lua
+mylua ../ChunkSpy/ChunkSpy.lua --source b.lua
 
 #进入交互模式
 #lua ../ChunkSpy/ChunkSpy.lua --interact
