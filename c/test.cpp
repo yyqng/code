@@ -113,9 +113,36 @@ void switch_case_test()
     switch_case0(2);
     switch_case0(15);
 }
+
+typedef struct strc_bak{
+    int key1;
+    int key2;
+}Strc_bak;
+
+typedef struct strc_test{
+    int key1;
+    int key2;
+    Strc_bak bk;
+}Strc_test;
+
+#define _BACKUP_PARAM(p, v) (p).bk.v=(p).v
+void define_test()
+{
+    Strc_test str;
+    str.key1 = 1;
+    str.key2 = 2;
+    printf("key1 = %d\n", str.key1);
+    printf("key2 = %d\n", str.key2);
+    _BACKUP_PARAM(str, key1);
+    printf("key1 = %d"
+            " great   test\n", str.bk.key1);
+    _BACKUP_PARAM(str, key2);
+    printf("key2 = %d\n", str.bk.key2);
+}
+
 int main()
 {
-    hm_test();
+//    hm_test();
 //    assert(0);
     //exit(3);
     //abort();
@@ -123,17 +150,5 @@ int main()
     //free(p);
     //switch_case_test();
     //print_env();
-    assert(1);
-    struct DoubleXY {
-        double x;
-        double y;
-    }b[2];
-    if (b[0].x > 0 &&
-        b[0].y > 0)
-    //if (b[0].x > 0)
-        printf("hello1");
-    if (b[0].x > 0 &&
-        b[0].y > 0)
-    //if (b[0].x > 0)
-        printf("hello2");
+    define_test();
 }
