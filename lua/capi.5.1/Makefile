@@ -3,9 +3,8 @@ TARGET1=libtest.so
 OBJ2=api.o tool.o color.o
 TARGET2=api.out
 CFLAG1=-g -Wall -llua -shared -fPIC #-std=c++11
-CFLAG2=-g -Wall -llua -ldl#-std=c++11 # -L /home/yoyu/hub/testcode/lua/capi -ltest
+CFLAG2=-g -Wall -llua #-std=c++11 # -L /home/yoyu/hub/testcode/lua/capi -ltest
 CC1=gcc
-#CC1=g++
 CC2=g++
 all:$(TARGET1) $(TARGET2)
 

@@ -1,0 +1,18 @@
+--Usage1:
+--
+--1. Set env:
+--package.path = package.path..";/home/yoyu/hub/testcode/lua/capi/?.lua"
+--require("a") --optional?
+--
+--or in .bashrc:
+--export LUA_PATH="$TESTCODE_PATH/lua/?.lua;$TESTCODE_PATH/lua/capi/?.lua"
+--
+--2. execute this script: lua -la -lb
+--
+--
+--Usage2:
+--1. enter lua interactive mode
+--2. > dofile("a.lua")
+--3. > dofile("b.lua"
+--print(x)
+local a = 1

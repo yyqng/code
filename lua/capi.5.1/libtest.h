@@ -22,7 +22,7 @@ typedef struct Student {
 int sum(lua_State *L);
 int mysin (lua_State *L);
 int dir (lua_State *L);
-//int map (lua_State *L);
+int map (lua_State *L);
 int new_NumArray (lua_State *L);
 int NumArray_print (lua_State *L);
 int new_Student (lua_State *L);
@@ -48,7 +48,7 @@ static const struct luaL_Reg mylib[] = {
     {"lsum", sum},
     {"lsin", mysin},
     {"ldir", dir},
-//    {"lmap", map},
+    {"lmap", map},
     {"lnew_NumArray", new_NumArray},
     {"lNumArray_print", NumArray_print},
     {"lnew_Student", new_Student},

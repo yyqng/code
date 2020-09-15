@@ -66,30 +66,30 @@ int dir (lua_State *L) {
     /* table is already on top */
 }
 
-//int map (lua_State *L) {
-//    stackDump(L);
-//    int i, n;
-//    /* 1st argument must be a table */
-//    luaL_checktype(L, 1, LUA_TTABLE);
-//    /* 2nd argument must be a function */
-//    luaL_checktype(L, 2, LUA_TFUNCTION);
-//    n = lua_rawlen(L, 1);          // get size of table 
-//    for (i = 1; i <= n; ++i) {
-//        lua_pushvalue(L, 2);       // push function
-//
-//        lua_rawgeti(L, 1, i);      // push table[i]. equal to call:
-//        //lua_pushnumber(L, i);
-//        //lua_rawget(L, 1);
-//
-//        lua_call(L, 1, 1);         // call function(table[i]) and push result
-//        
-//        lua_rawseti(L, 1, i);      // table[i] = result. equal to call:
-//        //lua_pushnumber(L, i);
-//        //lua_insert(L, -2);
-//        //lua_rawset(L, 1);
-//    }
-//    return 0; /* no results */
-//}
+int map (lua_State *L) {
+    stackDump(L);
+    int i, n;
+    /* 1st argument must be a table */
+    luaL_checktype(L, 1, LUA_TTABLE);
+    /* 2nd argument must be a function */
+    luaL_checktype(L, 2, LUA_TFUNCTION);
+    n = lua_rawlen(L, 1);          // get size of table 
+    for (i = 1; i <= n; ++i) {
+        lua_pushvalue(L, 2);       // push function
+
+        lua_rawgeti(L, 1, i);      // push table[i]. equal to call:
+        //lua_pushnumber(L, i);
+        //lua_rawget(L, 1);
+
+        lua_call(L, 1, 1);         // call function(table[i]) and push result
+        
+        lua_rawseti(L, 1, i);      // table[i] = result. equal to call:
+        //lua_pushnumber(L, i);
+        //lua_insert(L, -2);
+        //lua_rawset(L, 1);
+    }
+    return 0; /* no results */
+}
 
 int new_NumArray (lua_State *L) {
     //stackDump(L);
@@ -139,27 +139,27 @@ int Student_print (lua_State *L) {
     return 0; /* no results */
 }
 
-//LUA_API int luaopen_NumArray(lua_State* L){
-//    luaL_newmetatable(L,"NumArray");
-//    lua_pushstring (L,"__index");
-//    lua_pushvalue(L,-2);
-//    lua_rawset(L,-3);
-//    luaL_setfuncs(L,mylib,0);
-//
-//    luaL_newlib(L,mylib);
-//    return 1;
-//}
+LUA_API int luaopen_NumArray(lua_State* L){
+    luaL_newmetatable(L,"NumArray");
+    lua_pushstring (L,"__index");
+    lua_pushvalue(L,-2);
+    lua_rawset(L,-3);
+    luaL_setfuncs(L,mylib,0);
 
-//LUA_API int luaopen_Student(lua_State* L){
-//    luaL_newmetatable(L,"Student");
-//    lua_pushstring (L,"__index");
-//    lua_pushvalue(L,-2);
-//    lua_rawset(L,-3);
-//    luaL_setfuncs(L,mylib,0);
-//
-//    luaL_newlib(L,mylib);
-//    return 1;
-//}
+    luaL_newlib(L,mylib);
+    return 1;
+}
+
+LUA_API int luaopen_Student(lua_State* L){
+    luaL_newmetatable(L,"Student");
+    lua_pushstring (L,"__index");
+    lua_pushvalue(L,-2);
+    lua_rawset(L,-3);
+    luaL_setfuncs(L,mylib,0);
+
+    luaL_newlib(L,mylib);
+    return 1;
+}
 
 int split (lua_State *L) {
     const char *s = luaL_checkstring(L, 1);

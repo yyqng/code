@@ -95,9 +95,10 @@ void lualenTest()
     lua_pushstring(L, "yoyu");
     const char *s = lua_tostring(L, -1); /* any Lua string */
     printf ("s is %s\n", s);
-//    size_t l = luaL_len(L, -1); /* its length */
-//    assert(s[l] == '\0');
-//    assert(strlen(s) <= l);
+    //size_t l = luaL_len(L, -1); /* its length */
+    size_t l = lua_objlen(L, -1); /* its length */
+    assert(s[l] == '\0');
+    assert(strlen(s) <= l);
     lua_close(L);
 }
 
@@ -215,7 +216,7 @@ void luaapitest() {
     lua_State *L = luaL_newstate();
 //    printf ("lua_version(NULL) = %f\n", *(double*)lua_version(NULL));
 //    printf ("lua_version(L) = %f\n", *(double*)lua_version(L));
-//    ((void)L);
+    ((void)L);
 //    luaL_checkversion(L);
     lua_close(L);
 }
@@ -276,8 +277,8 @@ int main(void)
     //callfLuafTest2();
     //execLuafile();
     //callGlobalLuafun();
-    //callLuafun();
+    callLuafun();
     //callfLuafTest();
     //luaapitest();
-    definetest();
+    //definetest();
 }

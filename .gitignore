@@ -9,6 +9,8 @@
 *.out
 *.log
 *tags
+*mylua
+*myluac
 unixpro/bin/*
 apue/bin/*
 *test
