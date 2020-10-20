@@ -274,10 +274,10 @@ int main(void)
     //loadConf();
     //loadTable();
     //callfLuafTest2();
-    //execLuafile();
+    execLuafile();
     //callGlobalLuafun();
     //callLuafun();
     //callfLuafTest();
     //luaapitest();
-    definetest();
+    //definetest();
 }
