@@ -1,19 +1,18 @@
 #/bin/bash
-mylua ../ChunkSpy/ChunkSpy.lua luac.out b.lua --brief
-#lua ../ChunkSpy/ChunkSpy.lua test.lua -o test.lst
+#mylua ../ChunkSpy/ChunkSpy.lua luac.out b.lua --brief
+
+#输出lua文件的opcode
+#lua ../ChunkSpy/ChunkSpy.lua --source test.lua
+#echo =============================================
+mylua ../ChunkSpy/ChunkSpy.lua --source b.lua --brief
 
 #chunkSpy使用
 #查看帮助选项
 #lua ../ChunkSpy/ChunkSpy.lua -h 
 
 #反汇编二进制文件
-#lua ../ChunkSpy/ChunkSpy.lua luac.out
+#lua ../ChunkSpy/ChunkSpy.lua luac.out 
 #lua ../ChunkSpy/ChunkSpy.lua luac.out -o test.lst
-
-#输出lua文件的opcode
-#lua ../ChunkSpy/ChunkSpy.lua --source test.lua
-echo =============================================
-mylua ../ChunkSpy/ChunkSpy.lua --source b.lua --brief
 
 #进入交互模式
 #lua ../ChunkSpy/ChunkSpy.lua --interact

@@ -1,5 +1,6 @@
 print( #{ [1] = 1, [2] = 2 } )
---print( #{ [1] = 1, [2] = 2, 1, 2, 3 } )
+print( #{ [1] = 1, [2] = 2, [5] = 5 } )
+print( #{ [1] = 1, [2] = 2, 1, 2, 3 } )
 
 count = 5
 function GlobalFunction()

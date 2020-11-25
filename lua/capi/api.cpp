@@ -146,12 +146,13 @@ double callfLuafTest2() {
 }
 
 double execLuafile() {
-    char filename[] = "test.lua";
+    char filename[] = "b.lua";
     lua_State *L = luaL_newstate();
     luaopen_base(L);
     if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0)) {
         error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
     }
+    lua_close(L);
     return 0;
 }
 
@@ -207,6 +208,19 @@ int callLuafun() {
         }
     }
     callGlobalLuafun(L);
+    lua_close(L);
+
+    return 0;
+}
+
+int dofile() {
+    char filename[] = "b.lua";
+    lua_State *L = luaL_newstate();
+    luaopen_base(L);
+    if (luaL_dofile(L, filename)) {
+        error(L, "luaL_dofile : %s", lua_tostring(L, -1));
+    }
+    lua_close(L);
 
     return 0;
 }
@@ -280,4 +294,5 @@ int main(void)
     //callfLuafTest();
     //luaapitest();
     //definetest();
+    dofile();
 }
