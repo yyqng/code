@@ -1,5 +1,5 @@
 #/bin/bash
-#lua ../ChunkSpy/ChunkSpy.lua luac.out -o myscript.lst
+mylua ../ChunkSpy/ChunkSpy.lua luac.out b.lua --brief
 #lua ../ChunkSpy/ChunkSpy.lua test.lua -o test.lst
 
 #chunkSpy使用
@@ -12,8 +12,8 @@
 
 #输出lua文件的opcode
 #lua ../ChunkSpy/ChunkSpy.lua --source test.lua
-#echo =============================================
-mylua ../ChunkSpy/ChunkSpy.lua --source b.lua
+echo =============================================
+mylua ../ChunkSpy/ChunkSpy.lua --source b.lua --brief
 
 #进入交互模式
 #lua ../ChunkSpy/ChunkSpy.lua --interact
