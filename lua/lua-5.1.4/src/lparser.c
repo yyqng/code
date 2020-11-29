@@ -1329,8 +1329,8 @@ static void chunk (LexState *ls) {
   while (!islast && !block_follow(ls->t.token)) {
     islast = statement(ls);
     testnext(ls, ';');
-    lua_assert(ls->fs->f->maxstacksize >= ls->fs->freereg &&
-               ls->fs->freereg >= ls->fs->nactvar);
+    lua_assert(ls->fs->f->maxstacksize >= ls->fs->freereg);
+    lua_assert(ls->fs->freereg >= ls->fs->nactvar);
     ls->fs->freereg = ls->fs->nactvar;  /* free registers */
   }
   leavelevel(ls);
