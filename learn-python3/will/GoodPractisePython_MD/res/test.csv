@@ -1,0 +1,4 @@
+index,session_name,status,input_file
+0,sess_preproc,1,input1.xml
+1,sess_main,0,input2.xml
+3,sess_stage0,0,input3.xml
