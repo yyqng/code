@@ -5,4 +5,4 @@ testtab = {
     id=100,
     ix=nil,
 }
-print("ok")
+--print("ok")
