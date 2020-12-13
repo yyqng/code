@@ -1,5 +1,12 @@
 #include "color.h"
 #include "lauxlib.h"
+#include <stdio.h>
+extern "C" {
+    #include "lua.h"
+    #include "lualib.h"
+    #include "lauxlib.h"
+}
+
 
 #define LUA_POP(L,n) lua_settop(L, -(n)-1)
 void stackDumpTest(void){
@@ -266,6 +273,42 @@ static int dt_get_patchsize(lua_State* L)
 }
 */
 
+int table_next(lua_State *L, int i,char **k, char **v)
+{
+    if (lua_next(L, i) != 0) {
+        *k = (char *)lua_tostring(L, -2);
+        *v = (char *)lua_tostring(L, -1);
+        lua_pop(L, 1);
+        printf("lua_next != 0 i = %d: k = %s  v = %s\n", i, *k, *v);
+        return 1;
+    } else {
+        printf("lua_next == 0 i = %d\n", i);
+        return 0;
+    }
+}
+
+int table_next_test(const char*filename)
+{
+    lua_State *L;
+    int t_idx;
+    char *k= NULL;
+    char *v= NULL;
+
+    L = lua_open();
+    luaL_openlibs(L);
+    luaL_loadfile(L, filename);
+    lua_pcall(L, 0, 0, 0);
+
+    lua_getglobal(L, "testtab");
+    t_idx = lua_gettop(L);
+    lua_pushnil(L);
+    while (table_next(L, 1, &k, &v) != 0) {
+    }
+
+    lua_close(L);
+    return 1;
+}
+
 int main(void)
 {
     //stackDumpTest();
@@ -281,6 +324,8 @@ int main(void)
     //callfLuafTest();
     //luaapitest();
     //definetest();
-    char filename[] = "b.lua";
-    dofile(filename);
+    //char filename[] = "b.lua";
+    //dofile(filename);
+    char filename[] = "luatest.lua";
+    table_next_test(filename);
 }
