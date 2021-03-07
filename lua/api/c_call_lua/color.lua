@@ -9,9 +9,9 @@
 --    width = 200; height = 200
 --end
 
-hello= "Hello from color.lua"
-print(hello)
-
+--hello= "Hello from color.lua"
+--print(hello)
+--
 BLUE = {r=0.1, g=0.1, b=1}
 RED = {r=1, g=0.1, b=0}
 background = BLUE

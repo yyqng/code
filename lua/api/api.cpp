@@ -1,4 +1,4 @@
-//#include "color.h"
+#include "color.h"
 //#include "libtest.h"
 #include "libtool.h"
 //#include "lauxlib.h"
@@ -258,6 +258,7 @@ int test_lua_cmd(void) {
 int main(void)
 {
     //stackDumpTest();
+    loadTable();
     //printFloats (3,3.14159,2.71828,1.41421);
     //lualenTest();
     //callGlobalLuafun();
@@ -269,9 +270,9 @@ int main(void)
     //char filename[] = "luatest.lua";
     //table_next_test(filename);
     //test_lua_cmd();
-    char filename[] = "c_call_lua/wk.lua";
-    callwk(filename, "wkmain");
-    callwk(filename, "wkinit");
+    //char filename[] = "c_call_lua/wk.lua";
+    //callwk(filename, "wkmain");
+    //callwk(filename, "wkinit");
 }
 #ifdef __cplusplus
 }
