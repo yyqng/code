@@ -50,30 +50,6 @@ void stackDumpTest(void){
 
     lua_close(L);
 }
-/**/
-int exeInputLua(void)
-{
-    char buff[256];
-    int error;
-    lua_State *L = luaL_newstate();//lua_open(); // opens Lua 
-    luaopen_base(L);   // opens the basic library 
-    luaopen_table(L);  // opens the table library 
-    luaopen_io(L);     // opens the I/O library 
-    luaopen_string(L); // opens the string lib. 
-    luaopen_math(L);   // opens the math lib. 
-    printf("Please input lua script:\n");
-    while (fgets(buff, sizeof(buff), stdin) != NULL) {
-        //Compile buff and execute chunk
-        error = luaL_loadbuffer(L, buff, strlen(buff), "line") || 
-                lua_pcall(L, 0, 0, 0);
-        if (error) {
-            fprintf(stderr, "%s\n", lua_tostring(L, -1));
-            lua_pop(L, 1);// pop error message from the stack
-        }
-    }
-    lua_close(L);
-    return 0;
-}
 
 void printFloats (int n, ...)
 {
@@ -91,17 +67,6 @@ void printFloats (int n, ...)
   printf ("\n");
 }
 
-void test2(void)
-{
-    const char *fmt = "%s %s";
-    const char *H = "Hello ";
-    const char *h = "hello\n";
-    const char *w = "world\n";
-    lua_State *L = luaL_newstate();//lua_open();
-    error(L, fmt, H, h, w);
-    lua_close(L);
-}
-
 void lualenTest()
 {
     lua_State *L = luaL_newstate();
@@ -112,46 +77,6 @@ void lualenTest()
 //    assert(s[l] == '\0');
 //    assert(strlen(s) <= l);
     lua_close(L);
-}
-
-double callfLuafTest () {
-    char filename[] = "pp.lua";
-    lua_State *L = luaL_newstate();
-    luaopen_base(L);
-    luaopen_io(L);
-    luaopen_string(L);
-    luaopen_math(L);
-    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0))
-        error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
-
-    double x = 3.0;
-    double y = 2.0;
-    double z = 0;
-    callLuaf(L, "wk", "dd>d", x, y, &z);//call Luaf(L, x, y);
-    lua_close(L);
-    printf ("In %s, wk(%f, %f) = %f\n", filename, x, y, z);
-    return z;
-}
-
-double callfLuafTest2() {
-    char filename[] = "pp.lua";
-    lua_State *L = luaL_newstate();
-    stackDump(L);
-    luaopen_base(L);
-    //luaopen_io(L);
-    //luaopen_string(L);
-    //luaopen_math(L);
-    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0))
-        error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
-
-    stackDump(L);
-    double x = 3.0;
-    double y = 2.0;
-    double z = 0;
-    callLuaf(L, "wk", "dd>d", x, y, &z);//call func(L, x, y);
-    lua_close(L);
-    printf ("In %s, Luaf(%f, %f) = %f\n", filename, x, y, z);
-    return z;
 }
 
 int callGlobalLuafun(lua_State *L = NULL) {
@@ -244,35 +169,6 @@ int callwk(const char *filename, const char* func) {
     return 0;
 }
 
-int callwk_bak(const char *filename, const char* func) {
-    lua_State *L = luaL_newstate();
-    luaopen_base(L);
-    luaopen_table(L);
-    luaopen_package(L);
-    luaopen_io(L);
-    luaopen_string(L);
-    luaopen_math(L);
-    luaL_openlibs(L); // open all the libs above
-    //if (luaL_loadfile(L, filename))
-    //    error(L, "luaL_loadfile(L, %s) failed: ", lua_tostring(L, -1));
-    if (luaL_dofile(L, filename))
-        error(L, "luaL_dofile: %s\n", lua_tostring(L, -1));
-    lua_getglobal(L, func);
-    lua_pushnumber(L, 10);   //--x 值入栈
-    lua_pushnumber(L, 20);   //--y 值入栈
-    if (lua_pcall(L, 2, 1, 0) != LUA_OK) {
-        error(L, "error running function %s\n", lua_tostring(L, -1));
-    }
-    if (!lua_isnumber(L, -1)) {
-        error(L, "function must return a number\n");
-    }
-    double z = lua_tonumber(L, -1);
-    lua_pop(L, 1); 
-    lua_close(L);
-    printf ("In %s, %s(10, 20) = %f\n", filename, func, z);
-    return 0;
-}
-
 void luaapitest() {
     lua_State *L = luaL_newstate();
 //    printf ("lua_version(NULL) = %f\n", *(double*)lua_version(NULL));
@@ -301,30 +197,6 @@ void definetest()
     #error if error
 #endif
 }
-
-/*
-static int dt_get_patchsize(lua_State* L)
-{
-    int r = ud->getHscanMode() ? ApiContext::CELL : ApiContext::P;
-    int n = lua_gettop(L);
-    if (n > 0) {
-        r = luaL_checkint(L, 1);
-    }
-    bl_rect_t rect;
-    get_patchrect(ud, r, &rect);
-    dt_ii_t* a = ud->getII();
-    double width = DT_I2U(a, (rect.right - rect.left));
-    double height = DT_I2U(a, (rect.top - rect.bottom));
-    lua_newtable(L);
-    lua_pushstring(L, "width");
-    lua_pushnumber(L, width);
-    lua_settable(L, -3);
-    lua_pushstring(L, "height");
-    lua_pushnumber(L, height);
-    lua_settable(L, -3);
-    return 1;
-}
-*/
 
 int table_next(lua_State *L, int i,char **k, char **v)
 {
@@ -386,25 +258,17 @@ int test_lua_cmd(void) {
 int main(void)
 {
     //stackDumpTest();
-    //exeInputLua();
-    //test2();
     //printFloats (3,3.14159,2.71828,1.41421);
     //lualenTest();
-    //loadConf();
-    //loadTable();
-    //callfLuafTest2();
     //callGlobalLuafun();
     //callLuafun();
-    //callfLuafTest();
     //luaapitest();
     //definetest();
-    //char filename[] = "calllib.lua";
-    //dofile(filename);
     //char filename[] = "c_call_lua/color.lua";
     //dofile(filename);
     //char filename[] = "luatest.lua";
     //table_next_test(filename);
-    test_lua_cmd();
+    //test_lua_cmd();
     char filename[] = "c_call_lua/wk.lua";
     callwk(filename, "wkmain");
     callwk(filename, "wkinit");
