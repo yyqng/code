@@ -1,5 +1,15 @@
 #include "libtest.h"
 
+int wkinit(lua_State *L){
+    printf("wkinit\n");
+    return 0;
+}
+
+int wkmain(lua_State *L){
+    printf("wkmain\n");
+    return 0;
+}
+
 int sum(lua_State *L){
     double d1 = luaL_checknumber(L, 1);
     double d2 = luaL_checknumber(L, 2);

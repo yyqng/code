@@ -231,19 +231,16 @@ int callwk(const char *filename, const char* func) {
     luaopen_string(L);
     luaopen_math(L);
     luaL_openlibs(L); // open all the libs above
-    //if (luaL_loadfile(L, filename))
-    //    error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
     if (luaL_dofile(L, filename))
         error(L, "luaL_dofile: %s\n", lua_tostring(L, -1));
-
-    double x = 3.0;
-    double y = 2.0;
-    double z = 0;
-    callLuaf(L, func, "dd>d", x, y, &z);//call func(L, x, y);
-    //double z =  callLuaf(L, func, x, y);
+    callLuaf(L, func, "");
     lua_close(L);
-    //printf ("In %s, %s(%f, %f) = %f\n", filename, func, x, y);
-    printf ("In %s, %s(%f, %f) = %f\n", filename, func, x, y, z);
+
+    //double x = 3.0;
+    //double y = 2.0;
+    //double z = 0;
+    //callLuaf(L, func, "dd>d", x, y, &z);//call func(L, x, y);
+    //printf ("In %s, %s(%f, %f) = %f\n", filename, func, x, y, z);
     return 0;
 }
 
@@ -389,7 +386,8 @@ int main(void)
     //char filename[] = "luatest.lua";
     //table_next_test(filename);
     char filename[] = "c_call_lua/wk.lua";
-    callwk(filename, "wk");
+    callwk(filename, "wkmain");
+    callwk(filename, "wkinit");
 }
 #ifdef __cplusplus
 }

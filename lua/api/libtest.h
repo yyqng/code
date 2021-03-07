@@ -19,6 +19,8 @@ typedef struct Student {
     char *name;
 } Student;
 
+int wkmain(lua_State *L);
+int wkinit(lua_State *L);
 int sum(lua_State *L);
 int mysin (lua_State *L);
 int dir (lua_State *L);
@@ -45,6 +47,8 @@ int array2string (lua_State *L);
 
 //Name of array mylib can be changed.
 static const struct luaL_Reg mylib[] = {
+    {"lwkinit", wkinit},
+    {"lwkmain", wkmain},
     {"lsum", sum},
     {"lsin", mysin},
     {"ldir", dir},
