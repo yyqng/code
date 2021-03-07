@@ -1,6 +1,7 @@
 TARGET = test.out
 
-CXXFLAGS= -g -Wall -std=gnu11 `pkg-config --cflags gsl` -O0 -pg #-quiet#-Werror
+#CXXFLAGS= -g -Wall -std=gnu11 `pkg-config --cflags gsl` -O0 -pg #-quiet#-Werror
+CXXFLAGS= -g -Wall `pkg-config --cflags gsl` -O0 -pg #-quiet#-Werror
 LDLIBS=`pkg-config --libs gsl`
 
 CXX_STD = -std=c++11

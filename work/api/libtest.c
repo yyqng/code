@@ -1,4 +1,29 @@
 #include "libtest.h"
+ 
+void stackDump(lua_State *L){
+    int i;
+    int top = lua_gettop(L);      //Return the number of elements.
+    printf("%d element(s): ", top);
+    for(i = 1; i <= top; i++){
+        int t = lua_type(L, i);
+        switch(t){
+            case LUA_TBOOLEAN:
+                printf(lua_toboolean(L, i) ? "true":"false");
+                break;
+            case LUA_TNUMBER:
+                printf("%g", lua_tonumber(L, i));
+                break;
+            case LUA_TSTRING:
+                printf("'%s'", lua_tostring(L, i));
+                break;
+            default:
+                printf("%s", lua_typename(L, t));
+                break;
+        }
+        printf(" ");
+    }
+    printf("\n");
+}
 
 int sum(lua_State *L){
     double d1 = luaL_checknumber(L, 1);
@@ -226,8 +251,7 @@ static NumArray *checkarray (lua_State *L) {
 }
 
 int newarray (lua_State *L) {
-    //int n = luaL_checkint(L, 1);
-    int n = luaL_checkinteger(L, 1);
+    int n = luaL_checkint(L, 1);
     size_t nbytes = sizeof(NumArray) + (n - 1)*sizeof(double);
     NumArray *a = (NumArray *)lua_newuserdata(L, nbytes);
     luaL_getmetatable(L, "LuaBook.array");
@@ -240,8 +264,7 @@ int newarray (lua_State *L) {
 int setarray (lua_State *L) {
     //NumArray *a = (NumArray *)lua_touserdata(L, 1);
     NumArray *a = checkarray(L);
-    //int index = luaL_checkint(L, 2);
-    int index = luaL_checkinteger(L, 2);
+    int index = luaL_checkint(L, 2);
     double value = luaL_checknumber(L, 3);
     luaL_argcheck(L, a != NULL, 1, "`array' expected");
     luaL_argcheck(L, 1 <= index && index <= a->size, 2, "index out of range");
@@ -252,8 +275,7 @@ int setarray (lua_State *L) {
 
 int getarray (lua_State *L) {
     NumArray *a = (NumArray *)lua_touserdata(L, 1);
-    //int index = luaL_checkint(L, 2);
-    int index = luaL_checkinteger(L, 2);
+    int index = luaL_checkint(L, 2);
     luaL_argcheck(L, a != NULL, 1, "'array' expected");
     luaL_argcheck(L, 1 <= index && index <= a->size, 2, "index out of range");
     lua_pushnumber(L, a->values[index-1]);
@@ -269,8 +291,7 @@ int getsize (lua_State *L) {
 }
 
 int newarrayV2 (lua_State *L) {
-    //int n = luaL_checkint(L, 1);
-    int n = luaL_checkinteger(L, 1);
+    int n = luaL_checkint(L, 1);
     size_t nbytes = sizeof(NumArray) + (n - 1)*sizeof(double);
     NumArray *a = (NumArray *)lua_newuserdata(L, nbytes);
     luaL_newmetatable(L, "luaBook.array");
@@ -288,8 +309,7 @@ int getsizeV2 (lua_State *L) {
 
 static double *getelem (lua_State *L) {
     NumArray *a = checkarray(L);
-    //int index = luaL_checkint(L, 2);
-    int index = luaL_checkinteger(L, 2);
+    int index = luaL_checkint(L, 2);
     luaL_argcheck(L, 1 <= index && index <= a->size, 2, "index out of range");
     return &a->values[index - 1];    // return element address.
 }
@@ -365,7 +385,6 @@ int luaopen_libtest(lua_State *L){
     //luaL_newlib(L, mylib); // 5.2
     //luaL_openlib(L, "array", mylib, 0);
     luaL_newmetatable(L, "LuaBook.array"); // Added to V2
-    //luaL_openlibs(L, "array", mylib, 0);
-    luaL_newlib(L, mylib);
+    luaL_openlib(L, "array", mylib, 0);
     return 1;
 }

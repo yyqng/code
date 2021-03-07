@@ -6,8 +6,8 @@
 #include <dirent.h>
 #include <errno.h>
 
-#include "libtool.h"
 
+void stackDump(lua_State *L);
 
 typedef struct NumArray {
     int size;

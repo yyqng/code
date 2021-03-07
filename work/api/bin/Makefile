@@ -1,12 +1,9 @@
-OBJ1=libtest.o libtool.o
-#OBJ1=libtool.o
-TARGET1=libtest.so
-#TARGET1=libtool.so
-OBJ2=api.o# tool.o# color.o
-TARGET2=api.out
+OBJ1=libwk.o
+TARGET1=libwk.so
+OBJ2=wk.o
+TARGET2=wk.out
 CFLAG1=-g -Wall -llua -shared -fPIC #-std=c++11
-#CFLAG2=-g -Wall -llua -ldl#-std=c++11 
-CFLAG2=-g -Wall -llua -lm -ldl -ltest -fPIC #-std=c++11
+CFLAG2=-g -Wall -lwk -llua -ldl#-std=c++11 # -L /home/yoyu/hub/testcode/lua/capi -ltest
 CC1=gcc
 #CC1=g++
 CC2=g++
@@ -20,7 +17,7 @@ $(TARGET2):$(OBJ2)
 %.o:%.c
 	$(CC1) $(CFLAG1) -c $< -o $@
 %.o:%.cpp
-	$(CC2) $(CFLAG2) -c $< -o $@
+	$(CC2) $(CFLAG1) -c $< -o $@
 
 .PHONY:clean
 clean:

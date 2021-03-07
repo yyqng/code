@@ -1,17 +1,11 @@
-//#include "color.h"
-//#include "libtest.h"
-#include "libtool.h"
-//#include "lauxlib.h"
+#include "color.h"
+#include "lauxlib.h"
 #include <stdio.h>
-
-#include <string.h>
-#ifdef __cplusplus //告诉编译器，如果定义了__cplusplus(即如果是cpp文件)
-
 extern "C" {
     #include "lua.h"
     #include "lualib.h"
     #include "lauxlib.h"
-#endif
+}
 
 
 #define LUA_POP(L,n) lua_settop(L, -(n)-1)
@@ -126,10 +120,12 @@ double callfLuafTest () {
 
     double x = 3.0;
     double y = 2.0;
-    double z = 0;
-    callLuaf(L, "wk", "dd>d", x, y, &z);//call Luaf(L, x, y);
+    double zV2 = 0;
+    callLuafV2(L, "Luaf", "dd>d", x, y, &zV2);//call Luaf(L, x, y);
+    double z =  callLuaf(L, x, y);
     lua_close(L);
-    printf ("In %s, wk(%f, %f) = %f\n", filename, x, y, z);
+    printf ("In %s, Luaf(%f, %f) = %f\n", filename, x, y, z);
+    printf ("In %s, Luaf(%f, %f) = %f\n", filename, x, y, zV2);
     return z;
 }
 
@@ -147,10 +143,12 @@ double callfLuafTest2() {
     stackDump(L);
     double x = 3.0;
     double y = 2.0;
-    double z = 0;
-    callLuaf(L, "wk", "dd>d", x, y, &z);//call func(L, x, y);
+    double z =  callLuaf(L, x, y);
     lua_close(L);
     printf ("In %s, Luaf(%f, %f) = %f\n", filename, x, y, z);
+    //double zV2 = 0;
+    //callLuafV2(L, "Luaf", "dd>d", x, y, &zV2);//call Luaf(L, x, y);
+    //printf ("In %s, Luaf(%f, %f) = %f\n", filename, x, y, zV2);
     return z;
 }
 
@@ -219,60 +217,6 @@ int dofile(const char *filename) {
     }
     lua_close(L);
 
-    return 0;
-}
-
-int callwk(const char *filename, const char* func) {
-    lua_State *L = luaL_newstate();
-    luaopen_base(L);
-    luaopen_table(L);
-    luaopen_package(L);
-    luaopen_io(L);
-    luaopen_string(L);
-    luaopen_math(L);
-    luaL_openlibs(L); // open all the libs above
-    //if (luaL_loadfile(L, filename))
-    //    error(L, "cannot run configuration file: %s", lua_tostring(L, -1));
-    if (luaL_dofile(L, filename))
-        error(L, "luaL_dofile: %s\n", lua_tostring(L, -1));
-
-    double x = 3.0;
-    double y = 2.0;
-    double z = 0;
-    callLuaf(L, func, "dd>d", x, y, &z);//call func(L, x, y);
-    //double z =  callLuaf(L, func, x, y);
-    lua_close(L);
-    //printf ("In %s, %s(%f, %f) = %f\n", filename, func, x, y);
-    printf ("In %s, %s(%f, %f) = %f\n", filename, func, x, y, z);
-    return 0;
-}
-
-int callwk_bak(const char *filename, const char* func) {
-    lua_State *L = luaL_newstate();
-    luaopen_base(L);
-    luaopen_table(L);
-    luaopen_package(L);
-    luaopen_io(L);
-    luaopen_string(L);
-    luaopen_math(L);
-    luaL_openlibs(L); // open all the libs above
-    //if (luaL_loadfile(L, filename))
-    //    error(L, "luaL_loadfile(L, %s) failed: ", lua_tostring(L, -1));
-    if (luaL_dofile(L, filename))
-        error(L, "luaL_dofile: %s\n", lua_tostring(L, -1));
-    lua_getglobal(L, func);
-    lua_pushnumber(L, 10);   //--x 值入栈
-    lua_pushnumber(L, 20);   //--y 值入栈
-    if (lua_pcall(L, 2, 1, 0) != LUA_OK) {
-        error(L, "error running function %s\n", lua_tostring(L, -1));
-    }
-    if (!lua_isnumber(L, -1)) {
-        error(L, "function must return a number\n");
-    }
-    double z = lua_tonumber(L, -1);
-    lua_pop(L, 1); 
-    lua_close(L);
-    printf ("In %s, %s(10, 20) = %f\n", filename, func, z);
     return 0;
 }
 
@@ -382,15 +326,8 @@ int main(void)
     //callfLuafTest();
     //luaapitest();
     //definetest();
-    //char filename[] = "calllib.lua";
-    //dofile(filename);
-    //char filename[] = "c_call_lua/color.lua";
-    //dofile(filename);
+    char filename[] = "b.lua";
+    dofile(filename);
     //char filename[] = "luatest.lua";
     //table_next_test(filename);
-    char filename[] = "c_call_lua/wk.lua";
-    callwk(filename, "wk");
 }
-#ifdef __cplusplus
-}
-#endif

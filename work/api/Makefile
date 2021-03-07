@@ -1,12 +1,9 @@
-OBJ1=libtest.o libtool.o
-#OBJ1=libtool.o
-TARGET1=libtest.so
-#TARGET1=libtool.so
-OBJ2=api.o# tool.o# color.o
+OBJ1=libtest.o
+#TARGET1=libtest.so
+OBJ2=api.o tool.o color.o
 TARGET2=api.out
 CFLAG1=-g -Wall -llua -shared -fPIC #-std=c++11
-#CFLAG2=-g -Wall -llua -ldl#-std=c++11 
-CFLAG2=-g -Wall -llua -lm -ldl -ltest -fPIC #-std=c++11
+CFLAG2=-g -Wall -llua -ldl -fPIC#-std=c++11 # -L /home/yoyu/hub/testcode/lua/capi -ltest
 CC1=gcc
 #CC1=g++
 CC2=g++
