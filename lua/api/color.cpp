@@ -64,13 +64,19 @@ void register_color()
 /* assume that table is on the stack top */
 int getfield(lua_State *L, const char *key)
 {
-    int result;
-    lua_pushstring(L, key);
-    lua_gettable(L, -2); /* push background[key] and remove key*/
+    int result = 0, isnum = 0;
+    //lua_pushstring(L, key);
+    //lua_gettable(L, -2); /* push background[key] and remove key*/
+    //or--------
+    lua_getfield(L, -1, key); /* push background[key] */
 
-    if (!lua_isnumber(L, -1))
+    //if (!lua_isnumber(L, -1))
+    //    error(L, "invalid component in background color");
+    //result = lua_tonumber(L, -1) * MAX_COLOR;
+    //or--------
+    result = (int)(lua_tonumberx(L, -1, &isnum) * MAX_COLOR);
+    if (!isnum)
         error(L, "invalid component in background color");
-    result = lua_tonumber(L, -1) * MAX_COLOR;
     lua_pop(L, 1); /* remove number */
     return result;
 }

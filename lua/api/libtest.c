@@ -10,7 +10,7 @@ int wkmain(lua_State *L){
     return 0;
 }
 
-int sum(lua_State *L){
+static int sum(lua_State *L){
     double d1 = luaL_checknumber(L, 1);
     double d2 = luaL_checknumber(L, 2);
     lua_pushnumber(L, d1+d2);
@@ -51,30 +51,31 @@ int dir (lua_State *L) {
     /* table is already on top */
 }
 
-//int map (lua_State *L) {
-//    stackDump(L);
-//    int i, n;
-//    /* 1st argument must be a table */
-//    luaL_checktype(L, 1, LUA_TTABLE);
-//    /* 2nd argument must be a function */
-//    luaL_checktype(L, 2, LUA_TFUNCTION);
-//    n = lua_rawlen(L, 1);          // get size of table 
-//    for (i = 1; i <= n; ++i) {
-//        lua_pushvalue(L, 2);       // push function
-//
-//        lua_rawgeti(L, 1, i);      // push table[i]. equal to call:
-//        //lua_pushnumber(L, i);
-//        //lua_rawget(L, 1);
-//
-//        lua_call(L, 1, 1);         // call function(table[i]) and push result
-//        
-//        lua_rawseti(L, 1, i);      // table[i] = result. equal to call:
-//        //lua_pushnumber(L, i);
-//        //lua_insert(L, -2);
-//        //lua_rawset(L, 1);
-//    }
-//    return 0; /* no results */
-//}
+int map (lua_State *L) {
+    //stackDump(L);
+    int i, n;
+    /* 1st argument must be a table */
+    luaL_checktype(L, 1, LUA_TTABLE);
+    /* 2nd argument must be a function */
+    luaL_checktype(L, 2, LUA_TFUNCTION);
+    //n = lua_rawlen(L, 1);          // get size of table . equal to call:
+    n = luaL_len(L, 1);              // get size of table 
+    for (i = 1; i <= n; ++i) {
+        lua_pushvalue(L, 2);         // push function
+        lua_geti(L, 1, i);           // push table[i]. equal to call:
+        //lua_rawgeti(L, 1, i);      // push table[i]. equal to call:
+        //lua_pushnumber(L, i);
+        //lua_rawget(L, 1);
+
+        lua_call(L, 1, 1);           // call and pop function(table[i]), push result
+        lua_seti(L, 1, i);           // table[i] = result. equal to call:
+        //lua_rawseti(L, 1, i);      // table[i] = result. equal to call:
+        //lua_pushnumber(L, i);
+        //lua_insert(L, -2);
+        //lua_rawset(L, 1);
+    }
+    return 0; /* no results */
+}
 
 int new_NumArray (lua_State *L) {
     //stackDump(L);
@@ -155,14 +156,31 @@ int split (lua_State *L) {
     /* repeat for each separator */
     while ((e = strchr(s, *sep)) != NULL) {
         lua_pushlstring(L, s, e - s); /* push substring */
-        lua_rawseti(L, -2, i++);
-        printf("%s\n",e);
-        s = e + 1; /* skip separator */
+        lua_rawseti(L, -2, i++);      /* insert to table */
+        s = e + 1;                    /* skip separator */
     }
     /* push last substring */
     lua_pushstring(L, s);
     lua_rawseti(L, -2, i);
     return 1; /* return the table */
+}
+
+static int tconcat(lua_State *L)
+{
+    luaL_Buffer b;
+    int i, n;
+    luaL_checktype(L, 1, LUA_TTABLE);
+    n = luaL_len(L, 1);
+    luaL_buffinit(L, &b);
+    for (i = 1; i <= n; i++) {
+        lua_geti(L, 1, i);      /*Get string from table*/
+        luaL_addvalue(&b);      /*Put string in buff*/
+    }
+    luaL_pushresult(&b);
+    char* s = lua_tostring(L, -1);
+    printf("in c   : s = %s\n", s);
+    //lua_remove(L, -1);
+    return 1;
 }
 
 int regref1(lua_State *L)
@@ -370,12 +388,52 @@ static const struct luaL_Reg arraylib_m[] =
 //    return 1;
 //}
 
+//Name of array mylib can be changed.
+static const struct luaL_Reg thelib[] = {
+    {"lwkinit", wkinit},
+    {"lwkmain", wkmain},
+    {"lsum", sum},
+    {"lsin", mysin},
+    {"ldir", dir},
+    {"lmap", map},
+    {"ltconcat", tconcat},
+    {"lnew_NumArray", new_NumArray},
+    {"lNumArray_print", NumArray_print},
+    {"lnew_Student", new_Student},
+    {"lStudent_print", Student_print},
+    {"lsplit", split},
+    {"lregref",  regref},
+
+    //{"lnewarray", newarray},
+    //{"lsetarray", setarray},
+    //{"lgetarray", getarray},
+    //{"lgetsize", getsize},
+
+    {"new", newarray},
+    {"set", setarray},
+    {"get", getarray},
+    {"size", getsize},
+
+    {"lnewarrayV2", newarrayV2},
+    {"lsetarrayV2", setarrayV2},
+    {"lgetarrayV2", getarrayV2},
+    {"lgetsizeV2", getsizeV2},
+
+    //{"lnew", newarray},
+    {"__tostring", array2string},
+    {"__index", setarray},
+    {"__newindex", getarray},
+    {"__len", getsize},
+    {NULL, NULL}
+};
+
 //Function name can not be changed.
+//int luaopen_libtest(lua_State *L){ 
 int luaopen_libtest(lua_State *L){ 
     //luaL_newlib(L, mylib); // 5.2
     //luaL_openlib(L, "array", mylib, 0);
-    luaL_newmetatable(L, "LuaBook.array"); // Added to V2
+//    luaL_newmetatable(L, "LuaBook.array"); // Added to V2
     //luaL_openlibs(L, "array", mylib, 0);
-    luaL_newlib(L, mylib);
+    luaL_newlib(L, thelib);
     return 1;
 }

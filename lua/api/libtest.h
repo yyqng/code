@@ -21,7 +21,7 @@ typedef struct Student {
 
 int wkmain(lua_State *L);
 int wkinit(lua_State *L);
-int sum(lua_State *L);
+//int sum(lua_State *L);
 int mysin (lua_State *L);
 int dir (lua_State *L);
 //int map (lua_State *L);
@@ -44,41 +44,3 @@ int setarrayV2 (lua_State *L);
 int getarrayV2 (lua_State *L);
 
 int array2string (lua_State *L);
-
-//Name of array mylib can be changed.
-static const struct luaL_Reg mylib[] = {
-    {"lwkinit", wkinit},
-    {"lwkmain", wkmain},
-    {"lsum", sum},
-    {"lsin", mysin},
-    {"ldir", dir},
-//    {"lmap", map},
-    {"lnew_NumArray", new_NumArray},
-    {"lNumArray_print", NumArray_print},
-    {"lnew_Student", new_Student},
-    {"lStudent_print", Student_print},
-    {"lsplit", split},
-    {"lregref",  regref},
-
-    //{"lnewarray", newarray},
-    //{"lsetarray", setarray},
-    //{"lgetarray", getarray},
-    //{"lgetsize", getsize},
-
-    {"new", newarray},
-    {"set", setarray},
-    {"get", getarray},
-    {"size", getsize},
-
-    {"lnewarrayV2", newarrayV2},
-    {"lsetarrayV2", setarrayV2},
-    {"lgetarrayV2", getarrayV2},
-    {"lgetsizeV2", getsizeV2},
-
-    //{"lnew", newarray},
-    {"__tostring", array2string},
-    {"__index", setarray},
-    {"__newindex", getarray},
-    {"__len", getsize},
-    {NULL, NULL}
-};

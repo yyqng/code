@@ -13,7 +13,7 @@ package.path = '/home/yoyu/hub/testcode/lua/api/lua_call_c/?.lua;'    --搜索lu
 package.cpath = '/home/yoyu/hub/testcode/lua/api/?.so;'    --搜索so模块
 local lib = require "libtest"
 local lualib = require "module"
-lualib.testmodule()
+--lualib.testmodule()
 
 l_structTest = function()
     pStudent = lib.lnew_Student()
@@ -28,15 +28,16 @@ l_structTest = function()
 end
 
 l_mapTest = function()
-    mytable = {}
-    mytable[1]= "ele1"
-    mytable[2]= "ele2"
-    myprint = function(param)
-       print("myprint:",param)
+    local t = {}
+    t[1]= "ele1"
+    t[2]= "ele2"
+    print("t = {", t[1], t[2], "}")
+    f = function(param)
+       print("f:",param)
        return 2222
     end
-    print("mytable = {", mytable[1], mytable[2], "}")
-    lib.lmap(mytable, myprint)
+    lib.lmap(t, f)
+    print("t = {", t[1], t[2], "}")
 end
 
 l_ctableTestV1 = function(n)
@@ -120,15 +121,53 @@ function Luaf(x, y)
 --    return (x^2 * math.sin(y))/(1 - x)
 end
 
+function printAll(var, name, table_depth, suf)
+    if ("string"~=type(name) and "number"~=type(name)) then name="UNKNOWN" end
+    if ("string"~=type(suf)) then suf="  " end
+    local ending = ""
+    --if ("userdata"==type(var) and not is_model) then ending=DT.get(var) end
+    print (suf .. name .. " = ", var, ending)
+    if ("table"==type(var)) then
+        print(suf .. name .. " = {")
+        if ("number"==type(table_depth)) then
+            table_depth = table_depth-1
+        else
+            table_depth = 5
+        end
+        if ("number"~=type(table_depth) or table_depth>=0) then
+            local subsuf = suf.."  "
+            for subname,subvar in pairs(var) do
+                if ("sgm_pw_model"~=name) then
+                    printAll(subvar, subname, table_depth, subsuf)
+                else
+                    printAll(subvar, subname, table_depth, subsuf)
+                end
+            end
+        end
+        print(suf .. "}")
+    end
+end
+
+
 --print(type(lib))
-print("call c lib: lib.lsum(23,17) = "..lib.lsum(23,17))
+--print("call c lib: lib.lsum(23,17) = "..lib.lsum(23,17))
+--local files = lib.ldir(".")
+--printAll(files, "files", 2, "hh ")
 --print(lib.lsin(3.14159265354))
 --print(mysin(3.14159265354))
---print(lib.ldir("."))
 --l_mapTest() 
 --l_structTest()
 
---print(lib.lsplit("hi,,there", ","))
+--local s = "hi,,there"
+--print("will split:"..s)
+--local split_result = lib.lsplit(s, "i")
+--printAll(split_result, "split_result", 2, "hh ")
+
+local s = {"Hi,", "Lua"}
+local b = lib.ltconcat(s);
+print("in lua : b = "..b)
+
+--print(lib.lsin(3.14159265354))
 --lib.lregref()
 --l_ctableTest(2)
 --l_stdinTest()
