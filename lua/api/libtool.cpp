@@ -1,13 +1,13 @@
 #include "libtool.h"
 
-void stackDump(lua_State *L){
+void stackDump(lua_State *L, const char *pre){
     int i;
     int top = lua_gettop(L);      //Return the number of elements.
-    printf("%d element(s): ", top);
+    printf("%s %d element(s): ", pre, top);
     for(i = 1; i <= top; i++){
-        if (i == 1) {
-            printf("[");
-        }
+        //if (i == 1) {
+            printf(" element[%d] ", i);
+        //}
         int t = lua_type(L, i);
         switch(t){
             case LUA_TBOOLEAN:
@@ -23,9 +23,8 @@ void stackDump(lua_State *L){
                 printf("%s", lua_typename(L, t));
                 break;
         }
-        printf(" ");
     }
-    printf("]\n");
+    printf("\n");
 }
 
 void error (lua_State *L, const char *fmt, ...) {

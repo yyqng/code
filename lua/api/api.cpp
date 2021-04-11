@@ -22,31 +22,31 @@ void stackDumpTest(void){
     lua_pushnumber(L, 10);
     lua_pushnil(L);
     lua_pushstring(L, "yoyu");
-    stackDump(L);         // dump the stack
+    stackDump(L, "1111");         // dump the stack
 
     lua_pushvalue(L, -4); // push the value of the index to the stack
-    stackDump(L);
+    stackDump(L, "2222");
 
     lua_replace(L, 3);    // pop a value and replace the index's
-    stackDump(L);
+    stackDump(L, "3333");
 
     lua_settop(L, 6);     // set the top index, fill 'nil'
-    stackDump(L);
+    stackDump(L, "4444");
 
     lua_remove(L, -3);    //
-    stackDump(L);
+    stackDump(L, "5555");
 
     lua_settop(L, -3);    //Count from top(0) to bottom(negative)
-    stackDump(L);
+    stackDump(L, "6666");
 
     lua_settop(L, 2);     //Count from bottom(1) to top(positive)
-    stackDump(L);
+    stackDump(L, "7777");
 
     lua_insert(L, -2);    // move top element to the bottom
-    stackDump(L);
+    stackDump(L, "8888");
 
     LUA_POP(L, 1);
-    stackDump(L);
+    stackDump(L, "9999");
 
     lua_close(L);
 }
@@ -79,6 +79,19 @@ void lualenTest()
     lua_close(L);
 }
 
+int callGlobalLuafunc(lua_State *L, const char* func) {
+    lua_getglobal(L, func);
+    if (!lua_isfunction(L, -1)) {
+        printf ("%s is not exist\n", func);
+        return -1;
+    }
+    if (lua_pcall(L, 0, 0, 0) != 0) {
+        printf ("lua_pcall: %s\n", lua_tostring(L, -1));
+        return -1;
+    }
+    return 0;
+}
+
 int callGlobalLuafun(lua_State *L = NULL) {
     char filename[] = "test.lua";
     if (!L) {
@@ -102,46 +115,54 @@ int callGlobalLuafun(lua_State *L = NULL) {
     return 0;
 }
 
-int callLuafun() {
-    char filename[] = "test.lua";
+int callLuafun2(char* const filename, const char** func) {
     lua_State *L = luaL_newstate();
     luaopen_base(L);
+    luaL_openlibs(L); // open all the libs
     if (luaL_dofile(L, filename)) {
         error(L, "luaL_dofile : %s", lua_tostring(L, -1));
     }
-    for (int i = 0; i < 2; ++i) {
-        lua_getglobal(L, "test");
-        if (!lua_istable(L, -1)) {
-            printf ("test is not exist\n");
-            return -1;
-        }
-        
-        lua_getfield(L, -1, "test_lua_func");
-        if (!lua_isfunction(L, -1)) {
-            printf ("test_lua_func is not exist\n");
-            //cout << "GlobalFunction is not exist" << endl;
-            return -1;
-        }
-        
-        lua_pushnumber(L, 11);
-        lua_pushnumber(L, 22);
-        if (lua_pcall(L, 2, 1, 0) != 0) {
+    for (int i = 0; i < 1; ++i) {
+        lua_getglobal(L, func[i]);
+        int ret = lua_pcall(L, 0, 1, 0);
+        if (ret != 0) {
             printf ("error %s\n", lua_tostring(L, -1));
             return -1;
         }
     }
-    callGlobalLuafun(L);
     lua_close(L);
-
     return 0;
 }
 
 int dofile(const char *filename) {
     lua_State *L = luaL_newstate();
     luaopen_base(L);
-    if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0)) {
-        error(L, "luaL_dofile || lua_pcall: %s", lua_tostring(L, -1));
+    luaopen_table(L);
+    luaopen_package(L);
+    luaopen_io(L);
+    luaopen_string(L);
+    luaopen_math(L);
+    luaL_openlibs(L); // open all the libs above
+    if (luaL_loadfile(L, filename)) {
+        error(L, "luaL_loadfile %s", lua_tostring(L, -1));
     }
+    if (lua_pcall(L, 0, 0, 0)) {
+        error(L, "lua_pcall: %s", lua_tostring(L, -1));
+    }
+    /*
+    const char *cmd = "    local key1, key2 = lib.lset_regref()\
+    print(string.format(\"%x\", key1))\
+    print(string.format(\"%x\", key2))\
+    lib.lget_regref(key1, key2)";*/
+    const char *cmd = "test_reg()";
+    if (luaL_dostring(L, cmd)) {
+        error(L, "luaL_loadstring: %s", lua_tostring(L, -1));
+    }
+    //callGlobalLuafunc(L, "ctest_reg");
+    /*
+    if (lua_pcall(L, 0, 0, 0)) {
+        error(L, "lua_pcall: %s", lua_tostring(L, -1));
+    }*/
     lua_close(L);
 
     return 0;
@@ -258,11 +279,16 @@ int test_lua_cmd(void) {
 int main(void)
 {
     //stackDumpTest();
-    loadTable();
+    //loadTable();
     //printFloats (3,3.14159,2.71828,1.41421);
     //lualenTest();
     //callGlobalLuafun();
-    //callLuafun();
+    //char filename[] = "testlua/test.lua";
+    //const char* funcname[] = {"myprint"}; //, "myprint"};
+    //callLuafun2(filename, funcname);
+    //char filename[] = "lua_call_c/calllib.lua";
+    //const char* funcname[] = {"test_reg"}; //, "myprint"};
+    //callLuafun2(filename, funcname);
     //luaapitest();
     //definetest();
     //char filename[] = "c_call_lua/color.lua";
@@ -273,6 +299,8 @@ int main(void)
     //char filename[] = "c_call_lua/wk.lua";
     //callwk(filename, "wkmain");
     //callwk(filename, "wkinit");
+    char filename[] = "lua_call_c/calllib.lua";
+    dofile(filename);
 }
 #ifdef __cplusplus
 }

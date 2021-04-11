@@ -99,21 +99,43 @@ l_stdinTest = function()
 end
 
 l_classTest = function()
-    --local metaarray = getmetatable(array.new(1))
-    --metaarray.__index = metaarray
-    --metaarray.set = array.set
-    --metaarray.size = array.size
-
-     a = lib.new(1000)
+    asize = 1000
+    a = lib.new(asize)
     --a[10] = 3.4
-    print(a)
-    print(lib.size(a)) --> 1000
-    for i=1,1000 do
+    for i = 1, asize do
         lib.set(a, i, 1/i)
     end
+    print(lib.size(a)) --> 1000
 --    a:set(10, 3.4)
-    print(lib.get(a, 10)) --> 1/10
-    lib.set(io.stdin, 1, 0)
+    print(lib.get(a, 10)) --> 0.1
+    --lib.set(io.stdin, 1, 0) --直接崩溃：report error
+end
+
+l_classTestV2 = function()
+    local metaarray = getmetatable(lib.new(1))
+    metaarray.__index = metaarray
+    metaarray.set = lib.set
+    metaarray.get = lib.get
+    metaarray.size = lib.size
+
+    asize = 1000
+    a = lib.new(asize)
+    print(#a)
+    for i = 1, asize do
+        a[i] = 1 / i --a.set(a, i, 1/i) -- or a:set(i, 1/i)
+    end
+    print(a:get(10)) --> 0.1 -- or a.get(a, 10)
+    --a.set(io.stdin, 1, 0) --直接崩溃：report error
+end
+
+l_classTestV3 = function()
+    asize = 1000
+    a = lib.new(asize)
+    print(#a)
+    for i = 1, asize do
+        a[i] = 1 / i --a.set(a, i, 1/i) -- or a:set(i, 1/i)
+    end
+    print(a[10]) -- print(a.size(a)) --> 1000
 end
 
 function Luaf(x, y)
@@ -148,11 +170,44 @@ function printAll(var, name, table_depth, suf)
     end
 end
 
+function test_reg()
+    local key1, key2 = lib.lset_regref()
+    print(string.format("%x", key1))
+    print(string.format("%x", key2))
+    lib.lget_regref(key1, key2)
+end
 
+function test_counter()
+    local c1 = lib.lnewCounter()
+    local c2 = lib.lnewCounter()
+    print(c1(), c2(), c1(), c2(), c1(), c2())
+end
+
+function tupple_test()
+    x = lib.lnew(10, "hi tupple", {}, 3)
+    print(x(1))
+    print(x(2))
+    print(x())
+    print(x(256))
+end
+
+function dir_test()
+    --local files = lib.ldir(".")
+    --printAll(files, "files", 2, "hh ")
+    for fname in lib.ldir(".") do
+        print(fname)
+    end
+end
 --print(type(lib))
---print("call c lib: lib.lsum(23,17) = "..lib.lsum(23,17))
---local files = lib.ldir(".")
---printAll(files, "files", 2, "hh ")
+
+--local a, b = lib.lsum(23, 17)
+--print(a)
+--print(b)
+
+--lib.lpush_test();
+--lib.lpop_test();
+
+
 --print(lib.lsin(3.14159265354))
 --print(mysin(3.14159265354))
 --l_mapTest() 
@@ -163,12 +218,20 @@ end
 --local split_result = lib.lsplit(s, "i")
 --printAll(split_result, "split_result", 2, "hh ")
 
-local s = {"Hi,", "Lua"}
-local b = lib.ltconcat(s);
-print("in lua : b = "..b)
+--local s = {"Hi,", "Lua"}
+--print("in lua : b = "..lib.ltconcat(s))
+--
+--print(lib.lstr_upper("Up"))
 
---print(lib.lsin(3.14159265354))
---lib.lregref()
 --l_ctableTest(2)
 --l_stdinTest()
---l_classTest()   ------wrong
+--l_classTest()
+--l_classTestV2()
+--print("-----------Don't call V2 and V3 at the same time")
+--l_classTestV3()
+
+--test_reg()
+--lib.lregref_test2()
+--test_counter()
+--tupple_test()
+dir_test()

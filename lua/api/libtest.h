@@ -5,6 +5,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "libtool.h"
 

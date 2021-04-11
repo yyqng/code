@@ -17,7 +17,7 @@ extern "C" {
     using namespace std;
 #endif
 
-void stackDump(lua_State *L);
+void stackDump(lua_State *L, const char *pre);
 
 void error (lua_State *L, const char *fmt, ...);
 
